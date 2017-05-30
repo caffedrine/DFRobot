@@ -1,15 +1,5 @@
 #include "DCMotor.h"
-#include "MotorDriver.h"
 #include "my_util.h"
-
-namespace shield
-{
-	void motor_forward(int motorID, int speed);
-	void motor_backward(int motorID, int speed);
-
-	void shield_motor1_update(int direction, int speed);
-	void shield_motor2_update(int direction, int speed);
-}
 
 namespace utils
 {
@@ -51,18 +41,14 @@ int motor4_speed = 245;     // 0 - 255
 //DCMotor <NAME>(const int speedPin, const int directionPin, bool forwardOn);
 //I have to specify whether the motor moves forward on HIGH or on LOW;
 //
-DCMotor M4(5, 4, 1);
-DCMotor M3(6, 7, 0);
-MotorDriver shieldMotor;
-
-//For M3 and M4 we'll have to use the shield driver.
+DCMotor M4(5,   4, 0);
+DCMotor M3(6,   7, 1);
+DCMotor M2(3,  12, 0);
+DCMotor M1(11, 13, 0);
 
 void setup()
 {
 	Serial.begin(19200);
-
-	//Initialize shield
-	shieldMotor.begin();
 
 	//Stop all motors
 	utils::brake();
@@ -81,85 +67,24 @@ void loop()
 	utils::updateMotors();
 }
 
-//Used to control shield motors
-namespace shield
-{
-	void motor_backward(int motorID, int speed)
-	{
-		speed = map(speed, 0, 255, 0, 100) * -1;
-
-		if (speed == 0)
-		{
-			shieldMotor.brake(motorID);
-
-			shieldMotor.stop(motorID);
-
-			digitalWrite(9 + motorID, LOW);
-		}
-		else
-		{
-			digitalWrite(9 + motorID, HIGH);
-
-			shieldMotor.speed(motorID, speed);
-		}
-	}
-
-	void motor_forward(int motorID, int speed)
-	{
-		speed = map(speed, 0, 255, 0, 100);
-
-		if (speed == 0)
-		{
-			shieldMotor.brake(motorID);
-
-			shieldMotor.stop(motorID);
-
-			digitalWrite(9 + motorID, LOW);
-		}
-		else
-		{
-			digitalWrite(9 + motorID, HIGH);
-
-			shieldMotor.speed(motorID, speed);
-		}
-	}
-
-	void shield_motor1_update(int direction, int speed)
-	{
-		if (direction == DIRECTION_FORWARD)
-		{
-			shield::motor_forward(1, speed);
-		}
-		else
-		{
-			shield::motor_backward(1, speed);
-		}
-	}
-
-	void shield_motor2_update(int direction, int speed)
-	{
-		if (direction == DIRECTION_FORWARD)
-		{
-			shield::motor_forward(0, speed);
-		}
-		else
-		{
-			shield::motor_backward(0, speed);
-		}
-	}
-}
-
 namespace utils
 {
 	void updateMotors()
 	{
 		//////////////////////////////////////////////////////////////////////////
 		//Motors speed and direction update
-		//shield::shield_motor1_update(motor1_direction, motor1_speed);  //Motor 1
-		//shield::shield_motor2_update(motor2_direction, motor2_speed);  //Motor 2
+		M1.setSpeed(motor1_speed);
+		M1.setDirection((direction) motor1_direction);
+		M1.run();       //Motor 1
+
+		M2.setSpeed(motor2_speed);
+		M2.setDirection((direction) motor2_direction);
+		M2.run();       //Motor 2
+
 		M3.setSpeed(motor3_speed);
 		M3.setDirection((direction) motor3_direction);
 		M3.run();       //Motor 3
+
 		M4.setSpeed(motor4_speed);
 		M4.setDirection((direction) motor4_direction);
 		M4.run();       //Motor 4
