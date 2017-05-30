@@ -1,0 +1,12 @@
+*.swp
+.metadata
+*/.metadata
+*/.swp
+/RemoteSystemsTempFiles
+*/core
+*/Release
+*/.settings
+*/.project
+*/.cproject
+*/.ino.cpp
+*~
