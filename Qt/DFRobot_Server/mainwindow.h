@@ -8,6 +8,7 @@
 #include <QSerialPortInfo>
 #include <QtNetwork>
 #include <QDateTime>
+#include <QtQuick/QtQuick>
 
 namespace Ui
 {
@@ -52,6 +53,11 @@ private slots:
     void on_pushButton_reverse4_clicked();
     void on_pushButton_minMotors_clicked();
     void on_pushButton_maxMotors_clicked();
+    void on_speedSlider_valueChanged(int value);
+    void on_leftRightSlider_valueChanged(int value);
+
+    //Some custom function
+    void updateSpeedGauge(int val);
 
 private:
     Ui::MainWindow *ui;
@@ -60,6 +66,10 @@ private:
 
     //Need a global variable to store time lapsed between serial write sessions
     qint64 prevMillis = 0;
+
+    //Gauge speedometter
+    QQuickView *viewGauge;
+    QWidget *containerGauge;
 };
 
 #endif // MAINWINDOW_H
