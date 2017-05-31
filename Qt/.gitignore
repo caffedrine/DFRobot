@@ -40,4 +40,8 @@ Makefile*
 
 # QtCtreator CMake
 CMakeLists.txt.user*
+*.qmlc
+*/*.qmlc
+
+*/*.*~
 
