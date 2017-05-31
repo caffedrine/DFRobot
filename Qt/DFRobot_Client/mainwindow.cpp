@@ -7,6 +7,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	viewGauge = new QQuickView();
+	containerGauge = QWidget::createWindowContainer(viewGauge, this);
+	containerGauge->setMinimumSize(160, 160);
+	containerGauge->setMaximumSize(160, 160);
+	containerGauge->setFocusPolicy(Qt::TabFocus);
+	viewGauge->setSource(QUrl("../CircularGauge.qml"));
+	ui->verticalLayout->addWidget(containerGauge);
+
+
     /*
     // Autofill ip address field when working on localhost
     QString ipAddress;
@@ -31,6 +40,26 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::updateSpeedGauge(int val)
+{
+	if(val < 0)
+		val *=-1;
+
+	if(val > 255)
+		val = 255;
+
+	//maping val to interval 0 - 100
+	val = (val * 100)/255;
+
+	//Update value
+	QObject *rectangle = viewGauge->rootObject(); //warning: only works when #include <QtQuick/QtQuick>
+	QObject *circularGauge = rectangle->findChild<QObject *>("circular_gauge");
+	if(circularGauge)
+	{
+		circularGauge->setProperty("value", val);
+	}
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -88,6 +117,8 @@ void MainWindow::updateServer()
     //For now, we only send motors parameters
     QString m1s, m1d, m2s, m2d, m3s, m3d, m4s, m4d; //Motors, directions and speeds
 
+	QString carDir, carSpeed;
+
     m1s = ui->m1speedLabel->text();
     m2s = ui->m2speedLabel->text();
     m3s = ui->m3speedLabel->text();
@@ -98,16 +129,37 @@ void MainWindow::updateServer()
     m3d = ui->m3DirButton->isChecked() ? "1" : "0";
     m4d = ui->m4DirButton->isChecked() ? "1" : "0";
 
+	carDir = ui->directionLabel->text();
+	carSpeed = ui->speedLabel->text();
+
     QString data;
     data += "[" + m1s + "|" + m1d + "],";
     data += "[" + m2s + "|" + m2d + "],";
     data += "[" + m3s + "|" + m3d + "],";
-    data += "[" + m4s + "|" + m4d + "]";
+	data += "[" + m4s + "|" + m4d + "],";
+	data += "[s|" + carSpeed + "],";
+	data += "[d|" + carDir + "]";
 
     qDebug() << data;
 
-    if(this->hSocket.isAvailable())
-        this->hSocket.write(data);
-    else
-        qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+	if(this->hSocket.isAvailable())
+		this->hSocket.write(data);
+	else
+		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+}
+
+void MainWindow::on_speedSlider_valueChanged(int value)
+{
+	this->ui->speedLabel->setText(QString::number(value));
+	updateSpeedGauge(value);
+
+	updateServer();
+}
+
+void MainWindow::on_directionSlider_valueChanged(int value)
+{
+	this->ui->directionLabel->setText(QString::number(value));
+	updateSpeedGauge(value);
+
+	updateServer();
 }

@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     containerGauge->setFocusPolicy(Qt::TabFocus);
     viewGauge->setSource(QUrl("../CircularGauge.qml"));
     ui->verticalLayout->addWidget(containerGauge);
-
 }
 
 MainWindow::~MainWindow()
@@ -270,7 +269,7 @@ void MainWindow::processRecvData(QString data)
         return;
 
     QStringList motors = data.split(",");
-    for(int i=0; i<=3; i++)
+	for(int i=0; i<=5; i++)
     {
         QString motor = motors[i].remove("[").remove("]");
 
@@ -306,6 +305,18 @@ void MainWindow::processRecvData(QString data)
                 ui->pushButton_reverse4->setChecked( direction ? 0 : 1 );
                 break;
             }
+
+			case 4:
+			{
+				ui->speedSlider->setValue(direction);
+				break;
+			}
+
+			case 5:
+			{
+				ui->leftRightSlider->setValue(direction);
+				break;
+			}
         }
     }
 }

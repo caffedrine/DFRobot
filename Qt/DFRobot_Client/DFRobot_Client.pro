@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network qml quick
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -31,3 +31,6 @@ HEADERS  += mainwindow.h \
     tcpsocket.h
 
 FORMS    += mainwindow.ui
+
+DISTFILES += \
+    CircularGauge.qml

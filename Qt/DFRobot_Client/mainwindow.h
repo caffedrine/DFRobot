@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtNetwork>
+#include <QtQuick/QtQuick>
 
 #include "tcpsocket.h"
 
@@ -35,11 +36,18 @@ private slots:
     void updateServer();
 
     void on_sendHelloButton_clicked();
+	void on_speedSlider_valueChanged(int value);
+	void on_directionSlider_valueChanged(int value);
+
+	void updateSpeedGauge(int val);
 
 private:
     Ui::MainWindow *ui;
     TcpSocket hSocket;
 
+	//Gauge speedometter
+	QQuickView *viewGauge;
+	QWidget *containerGauge;
 };
 
 #endif // MAINWINDOW_H
