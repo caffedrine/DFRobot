@@ -11,6 +11,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    viewGauge = new QQuickView();
+    containerGauge = QWidget::createWindowContainer(viewGauge, this);
+    containerGauge->setMinimumSize(160, 160);
+    containerGauge->setMaximumSize(160, 160);
+    containerGauge->setFocusPolicy(Qt::TabFocus);
+    viewGauge->setSource(QUrl("../CircularGauge.qml"));
+    ui->verticalLayout->addWidget(containerGauge);
+
 }
 
 MainWindow::~MainWindow()
@@ -19,6 +28,26 @@ MainWindow::~MainWindow()
 
     if(pSerialPort)
         delete pSerialPort;
+}
+
+void MainWindow::updateSpeedGauge(int val)
+{
+    if(val < 0)
+        val *=-1;
+
+    if(val > 255)
+        val = 255;
+
+    //maping val to interval 0 - 100
+    val = (val * 100)/255;
+
+    //Update value
+    QObject *rectangle = viewGauge->rootObject(); //warning: only works when #include <QtQuick/QtQuick>
+    QObject *circularGauge = rectangle->findChild<QObject *>("circular_gauge");
+    if(circularGauge)
+    {
+        circularGauge->setProperty("value", val);
+    }
 }
 
 void MainWindow::on_pushButton_connectArduino_clicked()
@@ -137,6 +166,8 @@ void MainWindow::on_pushButton_updateList_clicked()
 void MainWindow::on_motor1_slider_valueChanged(int value)
 {
     ui->motor1_speedLabel->setText( QString::number(value) );
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
 
     serialSendDataToCar();
 }
@@ -144,18 +175,27 @@ void MainWindow::on_motor1_slider_valueChanged(int value)
 void MainWindow::on_motor2_slider_valueChanged(int value)
 {
     ui->motor2_speedLabel->setText( QString::number(value) );
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_motor3_slider_valueChanged(int value)
 {
     ui->motor3_speedLabel->setText( QString::number(value) );
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_motor4_slider_valueChanged(int value)
 {
     ui->motor4_speedLabel->setText( QString::number(value) );
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
@@ -298,50 +338,91 @@ void MainWindow::serialSendDataToCar()
 {
     QString msg = ""; // [M1,0,255] - motor, direction, speed
 
-    msg += "[M1,";
-    msg += ui->pushButton_reverse1->isChecked() ? "1" : "0";
-    msg += ",";
-    msg += QString::number(ui->motor1_slider->value());
-    msg += "]-";
+    if(ui->offsetCheckBox->isChecked() == false)
+    {
+        msg += "[M1,";
+        msg += ui->pushButton_reverse1->isChecked() ? "1" : "0";
+        msg += ",";
+        msg += QString::number(ui->motor1_slider->value());
+        msg += "]-";
 
-    msg += "[M2,";
-    msg += ui->pushButton_reverse2->isChecked() ? "1" : "0";
-    msg += ",";
-    msg += QString::number(ui->motor2_slider->value());
-    msg += "]-";
+        msg += "[M2,";
+        msg += ui->pushButton_reverse2->isChecked() ? "1" : "0";
+        msg += ",";
+        msg += QString::number(ui->motor2_slider->value());
+        msg += "]-";
 
-    msg += "[M3,";
-    msg += ui->pushButton_reverse3->isChecked() ? "1" : "0";
-    msg += ",";
-    msg += QString::number(ui->motor3_slider->value());
-    msg += "]-";
+        msg += "[M3,";
+        msg += ui->pushButton_reverse3->isChecked() ? "1" : "0";
+        msg += ",";
+        msg += QString::number(ui->motor3_slider->value());
+        msg += "]-";
 
-    msg += "[M4,";
-    msg += ui->pushButton_reverse4->isChecked() ? "1" : "0";
-    msg += ",";
-    msg += QString::number(ui->motor4_slider->value());
-    msg += "]";
+        msg += "[M4,";
+        msg += ui->pushButton_reverse4->isChecked() ? "1" : "0";
+        msg += ",";
+        msg += QString::number(ui->motor4_slider->value());
+        msg += "]";
+    }
+    else
+    {
+        int m1Offset, m2Offset, m3Offset, m4Offset;
+        int m1Speed, m2Speed, m3Speed, m4Speed;
+        int m1Dir, m2Dir, m3Dir, m4Dir;
+        int direction;
+        int speed;
 
+        direction = ui->directionLabel->text().toInt();
+        m1Offset = ui->motor1_speedLabel->text().toInt();
+        m2Offset = ui->motor2_speedLabel->text().toInt();
+        m3Offset = ui->motor3_speedLabel->text().toInt();
+        m4Offset = ui->motor4_speedLabel->text().toInt();
+
+        if(speed < 0)
+        {
+            m1Dir = m2Dir = m3Dir = m4Dir = 0;
+        }
+        else if(speed > 0)
+        {
+            m1Dir = m2Dir = m3Dir = m4Dir = 1;
+        }
+
+
+
+
+    }
     serialWrite(msg);
 }
 
 void MainWindow::on_pushButton_reverse1_clicked()
 {
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_reverse2_clicked()
 {
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_reverse3_clicked()
 {
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_reverse4_clicked()
 {
+    if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
     serialSendDataToCar();
 }
 
@@ -360,4 +441,25 @@ void MainWindow::on_pushButton_maxMotors_clicked()
     ui->motor2_slider->setValue(ui->motor2_slider->maximum());
     ui->motor3_slider->setValue(ui->motor3_slider->maximum()); QThread::msleep(50);
     ui->motor4_slider->setValue(ui->motor4_slider->maximum());
+}
+
+void MainWindow::on_speedSlider_valueChanged(int value)
+{
+    if(ui->offsetCheckBox->isChecked() == false)
+        return;
+
+    updateSpeedGauge(value);
+    ui->speedLabel->setText(QString::number(value));
+
+    serialSendDataToCar();
+}
+
+void MainWindow::on_leftRightSlider_valueChanged(int value)
+{
+    if(ui->offsetCheckBox->isChecked() == false)
+        return;
+
+    ui->directionLabel->setText( QString::number(value) );
+
+    serialSendDataToCar();
 }
