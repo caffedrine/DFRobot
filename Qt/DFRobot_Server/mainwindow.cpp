@@ -370,7 +370,8 @@ void MainWindow::serialSendDataToCar()
         int m1Speed, m2Speed, m3Speed, m4Speed;
         int m1Dir, m2Dir, m3Dir, m4Dir;
         int direction;
-        int speed;
+        int speed = 0;
+        int overVal = 0;
 
         direction = ui->directionLabel->text().toInt();
         m1Offset = ui->motor1_speedLabel->text().toInt();
@@ -378,20 +379,80 @@ void MainWindow::serialSendDataToCar()
         m3Offset = ui->motor3_speedLabel->text().toInt();
         m4Offset = ui->motor4_speedLabel->text().toInt();
 
+        speed = ui->speedLabel->text().toInt();
+
         if(speed < 0)
         {
             m1Dir = m2Dir = m3Dir = m4Dir = 0;
+            speed *= -1;
         }
-        else if(speed > 0)
-        {
+        else
             m1Dir = m2Dir = m3Dir = m4Dir = 1;
+
+        m1Speed = m2Speed = m3Speed = m4Speed = speed;
+
+        //We may want to add offsets
+        if(m1Speed + m1Offset > 255 || m2Speed + m2Offset > 255 ||
+           m3Speed + m3Offset > 255 || m4Speed + m4Offset > 255)
+        {
+            //How much more
+            if(m1Speed + m1Offset > 255) overVal = (m1Speed + m1Offset) - 255;
+            else if(m2Speed + m2Offset > 255) overVal = (m2Speed + m2Offset) - 255;
+            else if(m3Speed + m3Offset > 255) overVal = (m3Speed + m3Offset) - 255;
+            else if(m4Speed + m4Offset > 255) overVal = (m4Speed + m4Offset) - 255;
+        }
+        else
+        {
+            m1Speed = speed + m1Offset;
+            m2Speed = speed + m2Offset;
+            m3Speed = speed + m3Offset;
+            m4Speed = speed + m4Offset;
         }
 
+        if( !(m1Speed + m1Offset > 255) )
+            m1Speed -= overVal;
+
+        if( !(m2Speed + m2Offset > 255) )
+            m2Speed -= overVal;
+
+        if( !(m3Speed + m3Offset > 255) )
+            m3Speed -= overVal;
+
+        if( !(m4Speed + m4Offset > 255) )
+            m4Speed -= overVal;
+
+        //Check if direction is changed and change motors values again
 
 
+        msg += "[M1,";
+        msg += QString::number(m1Dir);
+        msg += ",";
+        msg += QString::number(m1Speed);
+        msg += "]-";
+
+        msg += "[M2,";
+        msg += QString::number(m2Dir);
+        msg += ",";
+        msg += QString::number(m2Speed);
+        msg += "]-";
+
+        msg += "[M3,";
+        msg += QString::number(m3Dir);
+        msg += ",";
+        msg += QString::number(m3Speed);
+        msg += "]-";
+
+        msg += "[M4,";
+        msg += QString::number(m4Dir);
+        msg += ",";
+        msg += QString::number(m4Speed);
+        msg += "]";
 
     }
-    serialWrite(msg);
+
+    qDebug() << msg << "\n";
+
+    //serialWrite(msg);
 }
 
 void MainWindow::on_pushButton_reverse1_clicked()
