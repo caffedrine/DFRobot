@@ -350,7 +350,7 @@ void MainWindow::serialSendDataToCar()
         msg += ui->pushButton_reverse2->isChecked() ? "1" : "0";
         msg += ",";
         msg += QString::number(ui->motor2_slider->value());
-        msg += "]-";
+		msg += "]-";
 
         msg += "[M3,";
         msg += ui->pushButton_reverse3->isChecked() ? "1" : "0";
@@ -381,6 +381,7 @@ void MainWindow::serialSendDataToCar()
 
         speed = ui->speedLabel->text().toInt();
 
+		//Setting up direction. Negative value means backward
         if(speed < 0)
         {
             m1Dir = m2Dir = m3Dir = m4Dir = 0;
@@ -392,14 +393,30 @@ void MainWindow::serialSendDataToCar()
         m1Speed = m2Speed = m3Speed = m4Speed = speed;
 
         //We may want to add offsets
-        if(m1Speed + m1Offset > 255 || m2Speed + m2Offset > 255 ||
-           m3Speed + m3Offset > 255 || m4Speed + m4Offset > 255)
+		if(m1Speed + m1Offset > 255 || m2Speed + m2Offset > 255 ||m3Speed + m3Offset > 255 || m4Speed + m4Offset > 255)
         {
             //How much more
-            if(m1Speed + m1Offset > 255) overVal = (m1Speed + m1Offset) - 255;
-            else if(m2Speed + m2Offset > 255) overVal = (m2Speed + m2Offset) - 255;
-            else if(m3Speed + m3Offset > 255) overVal = (m3Speed + m3Offset) - 255;
-            else if(m4Speed + m4Offset > 255) overVal = (m4Speed + m4Offset) - 255;
+			if(m1Speed + m1Offset > 255)
+			{
+				overVal = (m1Speed + m1Offset) - 255;
+				m1Speed = m1Offset + speed - overVal;
+				//Or you can simply m1Speed = 255 if yuou don't like math	.
+			}
+			else if(m2Speed + m2Offset > 255)
+			{
+				overVal = (m2Speed + m2Offset) - 255;
+				m2Speed = m2Offset + speed - overVal;
+			}
+			else if(m3Speed + m3Offset > 255)
+			{
+				overVal = (m3Speed + m3Offset) - 255;
+				m3Speed = m3Offset + speed - overVal;
+			}
+			else if(m4Speed + m4Offset > 255)
+			{
+				overVal = (m4Speed + m4Offset) - 255;
+				m4Speed = m4Offset + speed - overVal;
+			}
         }
         else
         {
@@ -409,17 +426,21 @@ void MainWindow::serialSendDataToCar()
             m4Speed = speed + m4Offset;
         }
 
-        if( !(m1Speed + m1Offset > 255) )
-            m1Speed -= overVal;
+		if( !(m1Speed + m1Offset > 255) )
+			m1Speed -= overVal;
 
-        if( !(m2Speed + m2Offset > 255) )
-            m2Speed -= overVal;
+		if( !(m2Speed + m2Offset > 255) )
+			m2Speed -= overVal;
 
-        if( !(m3Speed + m3Offset > 255) )
-            m3Speed -= overVal;
+		if( !(m3Speed + m3Offset > 255) )
+			m3Speed -= overVal;
 
-        if( !(m4Speed + m4Offset > 255) )
-            m4Speed -= overVal;
+		if( !(m4Speed + m4Offset > 255) )
+			m4Speed -= overVal;
+
+		//hOWEVER, IF SPEED = 0, we want breake
+		if(speed == 0)
+			m1Speed = m2Speed = m3Speed = m4Speed = 0;
 
         //Check if direction is changed and change motors values again
 
@@ -449,10 +470,8 @@ void MainWindow::serialSendDataToCar()
         msg += "]";
 
     }
-
-    qDebug() << msg << "\n";
-
-    //serialWrite(msg);
+	//qDebug() << msg << "\n";
+	serialWrite(msg);
 }
 
 void MainWindow::on_pushButton_reverse1_clicked()

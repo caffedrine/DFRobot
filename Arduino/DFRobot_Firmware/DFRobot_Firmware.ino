@@ -23,28 +23,32 @@ namespace utils
 
 //Motor1
 int motor1_direction = 0;       // 1 - Forward, 0 - Backward
-int motor1_speed = 255;     // 0 - 255
+int motor1_speed = 0;     // 0 - 255
 
 //Motor2
 int motor2_direction = 0;       // 1 - Forward, 0 - Backward
-int motor2_speed = 180;     // 0 - 255
+int motor2_speed = 0;     // 0 - 255
 
 //Motor3
 int motor3_direction = 0;       // 1 - Forward, 0 - Backward
-int motor3_speed = 225;     // 0 - 255
+int motor3_speed = 0;     // 0 - 255
 
 //Motor4
 int motor4_direction = 0;       // 1 - Forward, 0 - Backward
-int motor4_speed = 245;     // 0 - 255
+int motor4_speed = 0;     // 0 - 255
 //////////////////////////////////////////////////////
 
 //DCMotor <NAME>(const int speedPin, const int directionPin, bool forwardOn);
 //I have to specify whether the motor moves forward on HIGH or on LOW;
 //
-DCMotor M4(5,   4, 0);
-DCMotor M3(6,   7, 1);
-DCMotor M2(3,  12, 0);
-DCMotor M1(11, 13, 0);
+//DCMotor M4(5,   4, 0);
+//DCMotor M3(6,   7, 1);
+//DCMotor M2(3,  12, 0);
+//DCMotor M1(11, 13, 0);
+DCMotor M2(5,   4, 1);
+DCMotor M1(6,   7, 0);
+DCMotor M3(3,  12, 1);
+DCMotor M4(11, 13, 1);
 
 void setup()
 {
@@ -52,7 +56,6 @@ void setup()
 
 	//Stop all motors
 	utils::brake();
-
 }
 
 void loop()
