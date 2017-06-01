@@ -7,6 +7,8 @@
 #include <QBitArray>
 #include <QDebug>
 
+#include "mainwindow.h"
+
 class TcpSocket : public QObject
 {
     Q_OBJECT

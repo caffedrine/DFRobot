@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	//Load speedmetter stuff
 	viewGauge = new QQuickView();
 	containerGauge = QWidget::createWindowContainer(viewGauge, this);
 	containerGauge->setMinimumSize(160, 160);
@@ -15,6 +16,22 @@ MainWindow::MainWindow(QWidget *parent) :
 	viewGauge->setSource(QUrl("../CircularGauge.qml"));
 	ui->verticalLayout->addWidget(containerGauge);
 
+	//lOAD JOYSTICK
+	QQuickView *view = new QQuickView();
+	view->setSource(QUrl("../virtual_joystick.qml"));
+#ifndef _WIN32
+	view->setClearBeforeRendering(true);
+	view->setColor(QColor(Qt::transparent));
+#endif
+	QQuickItem *root = view->rootObject();
+	connect(root, SIGNAL(joystick_moved(double, double)), this, SLOT(joystick_moved(double, double)) );
+
+	// Create a container widget for the QQuickView
+	QWidget *container = QWidget::createWindowContainer(view, this);
+	container->setMinimumSize(160, 160);
+	container->setMaximumSize(160, 160);
+	container->setFocusPolicy(Qt::TabFocus);
+	ui->joystickLayout->addWidget(container);
 
     /*
     // Autofill ip address field when working on localhost
@@ -98,19 +115,29 @@ void MainWindow::on_sendHellobutton_clicked()
 
 void MainWindow::on_connectButton_clicked()
 {
-    hSocket.setHostname(ui->ipTextBox->text());
-    hSocket.setPort(ui->portTextBox->text().toInt());
+	if(hSocket)
+		delete hSocket;
 
-    hSocket.doConnect();
+	hSocket = new TcpSocket(this);
+
+	hSocket->setHostname(ui->ipTextBox->text());
+	hSocket->setPort(ui->portTextBox->text().toInt());
+
+	hSocket->doConnect();
 }
 
 void MainWindow::on_sendHelloButton_clicked()
 {
-    this->hSocket.write("Hello, once again!");
+	if(!hSocket)
+			return;
+
+	this->hSocket->write("Hello, once again!");
 }
 
 void MainWindow::updateServer()
 {
+	return;
+
     //Build the string we want to send via network
     //I will use JSON
 
@@ -142,8 +169,8 @@ void MainWindow::updateServer()
 
     qDebug() << data;
 
-	if(this->hSocket.isAvailable())
-		this->hSocket.write(data);
+	if(this->hSocket->isAvailable())
+		this->hSocket->write(data);
 	else
 		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
 }
@@ -162,4 +189,46 @@ void MainWindow::on_directionSlider_valueChanged(int value)
 	updateSpeedGauge(value);
 
 	updateServer();
+}
+
+void MainWindow::on_emergencyButton_clicked()
+{
+	this->ui->speedSlider->setValue(0);
+	this->ui->directionSlider->setValue(0);
+	delay(200);
+	updateServer();
+}
+
+void MainWindow::delay(long milis)
+{
+	QTime dieTime= QTime::currentTime().addMSecs(milis);
+	while (QTime::currentTime() < dieTime)
+		QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+}
+
+int map(double x, double in_min, double in_max, double out_min, double out_max)
+{
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void MainWindow::joystick_moved(double x, double y)
+{
+	//qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
+	this->ui->speedSlider->setValue( map(y, -1.00000, 1.00000, -255, +255) );
+	this->ui->directionSlider->setValue( map(x, -1.00000, 1.00000, -255, +255) );
+
+
+}
+
+void MainWindow::serverConnectionChanged(bool status)
+{
+	this->ui->connStatusLabel->setText( status ? "CONNECTED" : "NOT CONNECTED" );
+}
+
+void MainWindow::on_disconnectButton_clicked()
+{
+	if(!hSocket)
+			return;
+
+	hSocket->disconnect();
 }

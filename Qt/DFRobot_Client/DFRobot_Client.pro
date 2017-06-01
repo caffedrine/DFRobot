@@ -33,4 +33,8 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 DISTFILES += \
-    CircularGauge.qml
+    CircularGauge.qml \
+    virtual_joystick.qml
+
+RESOURCES += \
+    resources.qrc

@@ -39,6 +39,7 @@ void TcpSocket::doConnect()
 
 void TcpSocket::connected()
 {
+	((MainWindow*)(parent()))->serverConnectionChanged(true);
     qDebug() << "connected...";
 
     // Hey server, tell me about you.
@@ -47,7 +48,8 @@ void TcpSocket::connected()
 
 void TcpSocket::disconnected()
 {
-    qDebug() << "disconnected...";
+	((MainWindow*)(parent()))->serverConnectionChanged(false);
+	qDebug() << "disconnected...";
 }
 
 void TcpSocket::bytesWritten(qint64 bytes)

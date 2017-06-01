@@ -45,10 +45,10 @@ int motor4_speed = 0;     // 0 - 255
 //DCMotor M3(6,   7, 1);
 //DCMotor M2(3,  12, 0);
 //DCMotor M1(11, 13, 0);
-DCMotor M2(5,   4, 1);
-DCMotor M1(6,   7, 0);
-DCMotor M3(3,  12, 1);
-DCMotor M4(11, 13, 1);
+DCMotor M2(5,   4, 0);
+DCMotor M1(6,   7, 1);
+DCMotor M3(3,  12, 0);
+DCMotor M4(11, 13, 0);
 
 void setup()
 {

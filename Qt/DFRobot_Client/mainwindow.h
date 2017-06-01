@@ -33,21 +33,31 @@ private slots:
     void on_sendHellobutton_clicked();
     void on_connectButton_clicked();
 
-    void updateServer();
-
     void on_sendHelloButton_clicked();
 	void on_speedSlider_valueChanged(int value);
 	void on_directionSlider_valueChanged(int value);
+	void on_emergencyButton_clicked();
 
+	void joystick_moved(double x, double y);
+
+	//Methods. Too lazi to declare as private ^_^
+	void updateServer();
 	void updateSpeedGauge(int val);
+	void delay(long milis);
+
+	void on_disconnectButton_clicked();
+
+public slots:
+	void serverConnectionChanged(bool);
 
 private:
     Ui::MainWindow *ui;
-    TcpSocket hSocket;
+	class TcpSocket *hSocket = Q_NULLPTR;
 
 	//Gauge speedometter
 	QQuickView *viewGauge;
 	QWidget *containerGauge;
+
 };
 
 #endif // MAINWINDOW_H
