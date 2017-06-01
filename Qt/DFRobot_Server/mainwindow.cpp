@@ -219,6 +219,13 @@ void MainWindow::on_pushButton_disconnectArduino_clicked()
 void MainWindow::setSerialPortStatus(bool connected)
 {
     ui->arduinoConnectionStatusLabel->setText( connected ? "CONNECTED" : "NOT CONNECTED" );
+	if(server)
+	{
+		if(!connected)
+			server->write("Arduino connection lost :(");
+		else
+			server->write("Houston, we have connection ^_^");
+	}
 }
 
 void MainWindow::serialConnectionChanged(QSerialPort::SerialPortError errNo)
@@ -491,6 +498,7 @@ void MainWindow::serialSendDataToCar()
 				if(m3Speed > 255)
 					m3Speed = 255;
 			}
+			
 			else
 			{
 				//we have to move right with k coeficient = direction

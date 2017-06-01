@@ -234,6 +234,6 @@ void MainWindow::on_disconnectButton_clicked()
 {
 	if(!hSocket)
 			return;
-
-	hSocket->disconnect();
+	//???
+	//hSocket->disconnected();
 }
