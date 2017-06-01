@@ -473,13 +473,20 @@ void MainWindow::serialSendDataToCar()
 				//We need positive direction as it is easier to work with
 				direction *= -1;
 
-				leftSideSpeed = speed - (direction/2);
-				rightSideSpeed = speed + (direction/2);
+				m1Speed -= (direction/2);
+				m4Speed -= (direction/2);
+
+				m2Speed += (direction/2);
+				m3Speed += (direction/2);
 			}
 			else
 			{
 				//we have to move right with k coeficient = direction
-				\
+				m1Speed += (direction/2);
+				m4Speed += (direction/2);
+
+				m2Speed -= (direction/2);
+				m3Speed -= (direction/2);
 			}
 		}
 
