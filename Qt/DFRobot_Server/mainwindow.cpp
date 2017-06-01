@@ -392,6 +392,7 @@ void MainWindow::serialSendDataToCar()
 
         speed = ui->speedLabel->text().toInt();
 
+		//Processing speed and stuff
 		//Setting up direction. Negative value means backward
         if(speed < 0)
         {
@@ -453,8 +454,34 @@ void MainWindow::serialSendDataToCar()
 		if(speed == 0)
 			m1Speed = m2Speed = m3Speed = m4Speed = 0;
 
+		//Process direction
         //Check if direction is changed and change motors values again
+		int direction = this->ui->leftRightSlider->value();
 
+		if(direction != 0)
+		{
+			//this mean that we have to change direction of pair motors
+			//M1 = M4
+			//M2 = M3
+
+			if(direction < 0)
+			{
+				//we have to turn left with coeficient k = direction
+				int leftSideSpeed = 0;
+				int rightSideSpeed = 0;
+
+				//We need positive direction as it is easier to work with
+				direction *= -1;
+
+				leftSideSpeed = speed - (direction/2);
+				rightSideSpeed = speed + (direction/2);
+			}
+			else
+			{
+				//we have to move right with k coeficient = direction
+				\
+			}
+		}
 
         msg += "[M1,";
         msg += QString::number(m1Dir);
