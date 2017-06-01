@@ -470,19 +470,51 @@ void MainWindow::serialSendDataToCar()
 				direction *= -1;
 
 				m1Speed -= (direction/2);
+				if(m1Speed < 0)
+				{
+					m1Speed *=-1;
+					m1Dir = (m1Dir == 0)?1:0;
+				}
+
 				m4Speed -= (direction/2);
+				if(m4Speed < 0)
+				{
+					m4Speed *=-1;
+					m4Dir = (m4Dir == 0)?1:0;
+				}
 
 				m2Speed += (direction/2);
+				if(m2Speed > 255)
+					m2Speed = 255;
+
 				m3Speed += (direction/2);
+				if(m3Speed > 255)
+					m3Speed = 255;
 			}
 			else
 			{
 				//we have to move right with k coeficient = direction
 				m1Speed += (direction/2);
+				if(m1Speed > 255)
+					m1Speed = 255;
+
 				m4Speed += (direction/2);
+				if(m4Speed > 255)
+					m4Speed = 255;
 
 				m2Speed -= (direction/2);
+				if(m2Speed < 0)
+				{
+					m2Speed *=-1;
+					m2Dir = (m2Dir == 0)?1:0;
+				}
+
 				m3Speed -= (direction/2);
+				if(m3Speed < 0)
+				{
+					m3Speed *=-1;
+					m3Dir = (m3Dir == 0)?1:0;
+				}
 			}
 		}
 
