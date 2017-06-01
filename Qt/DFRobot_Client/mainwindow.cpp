@@ -136,8 +136,6 @@ void MainWindow::on_sendHelloButton_clicked()
 
 void MainWindow::updateServer()
 {
-	return;
-
     //Build the string we want to send via network
     //I will use JSON
 
