@@ -456,7 +456,7 @@ void MainWindow::serialSendDataToCar()
 
 		//Process direction
         //Check if direction is changed and change motors values again
-		int direction = this->ui->leftRightSlider->value();
+		direction = this->ui->leftRightSlider->value();
 
 		if(direction != 0)
 		{
@@ -466,10 +466,6 @@ void MainWindow::serialSendDataToCar()
 
 			if(direction < 0)
 			{
-				//we have to turn left with coeficient k = direction
-				int leftSideSpeed = 0;
-				int rightSideSpeed = 0;
-
 				//We need positive direction as it is easier to work with
 				direction *= -1;
 
