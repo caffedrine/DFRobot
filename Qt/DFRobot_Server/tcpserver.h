@@ -20,7 +20,7 @@ public:
     qint64 write(QString data);
     bool getServerStatus();
 
-signals:
+//signals:
 
 public slots:
     void newConnection();

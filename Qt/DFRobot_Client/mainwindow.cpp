@@ -71,8 +71,9 @@ void MainWindow::updateSpeedGauge(int val)
 	val = (val * 100)/255;
 
 	//Update value
-	QObject *rectangle = viewGauge->rootObject(); //warning: only works when #include <QtQuick/QtQuick>
-	QObject *circularGauge = rectangle->findChild<QObject *>("circular_gauge");
+    QObject *rectangle      = viewGauge->rootObject(); //warning: only works when #include <QtQuick/QtQuick>
+    QObject *circularGauge  = rectangle->findChild<QObject *>("circular_gauge");
+
 	if(circularGauge)
 	{
 		circularGauge->setProperty("value", val);
@@ -161,8 +162,8 @@ void MainWindow::updateServer()
     m3d = ui->m3DirButton->isChecked() ? "1" : "0";
     m4d = ui->m4DirButton->isChecked() ? "1" : "0";
 
-	carDir = ui->directionLabel->text();
-	carSpeed = ui->speedLabel->text();
+    carDir      = ui->directionLabel->text();
+    carSpeed    = ui->speedLabel->text();
 
     QString data;
     data += "[" + m1s + "|" + m1d + "],";

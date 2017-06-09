@@ -667,10 +667,10 @@
       </rect>
      </property>
      <property name="minimum">
-      <number>-255</number>
+      <number>-100</number>
      </property>
      <property name="maximum">
-      <number>255</number>
+      <number>100</number>
      </property>
      <property name="singleStep">
       <number>5</number>
