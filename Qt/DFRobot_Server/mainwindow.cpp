@@ -404,21 +404,21 @@ void MainWindow::serialSendDataToCar()
         // Read speed and direction
         speed = ui->speedLabel->text().toInt();
 
+        //Processing speed and stuff
+        //Setting up direction. Negative value means backward
+        if(speed < 0)
+        {
+            m1Dir = m2Dir = m3Dir = m4Dir = 0;
+            speed *= -1;
+        }
+        else
+            m1Dir = m2Dir = m3Dir = m4Dir = 1;
+
+        // Set all speed
+        m1Speed = m2Speed = m3Speed = m4Speed = speed;
+
         if( !direction )
         {
-            //Processing speed and stuff
-            //Setting up direction. Negative value means backward
-            if(speed < 0)
-            {
-                m1Dir = m2Dir = m3Dir = m4Dir = 0;
-                speed *= -1;
-            }
-            else
-                m1Dir = m2Dir = m3Dir = m4Dir = 1;
-
-            // Set all speed
-            m1Speed = m2Speed = m3Speed = m4Speed = speed;
-
             /*
                 If make motor as array:
                 int motors[motorsNumber];
