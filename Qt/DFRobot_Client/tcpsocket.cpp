@@ -67,8 +67,7 @@ void TcpSocket::readyRead()
 
 void TcpSocket::write(QString msg)
 {
-    //const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
-    const QByteArray bytesToSend = QByteArray::fromHex( msg.toUtf8() ); //under windows
+    const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
     this->socket->write(bytesToSend);
 }
 

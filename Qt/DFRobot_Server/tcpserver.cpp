@@ -98,8 +98,8 @@ qint64 TcpServer::write(QString msg)
         return -1;
     }
 
-    //const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
-    const QByteArray bytesToSend = QByteArray::fromHex( msg.toUtf8() ); //under windows
+    //converion function requires Qt >= 5.4 or something...
+    const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
 
     return this->socket->write(bytesToSend);
 }
