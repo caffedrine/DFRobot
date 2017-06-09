@@ -19,6 +19,7 @@ public:
     void setPort(int port);
 
     void doConnect();
+    void doDisconnect();
     void write(QString data);
     bool isAvailable();
 

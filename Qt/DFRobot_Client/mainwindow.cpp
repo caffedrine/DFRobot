@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	container->setFocusPolicy(Qt::TabFocus);
 	ui->joystickLayout->addWidget(container);
 
-    /*
+
     // Autofill ip address field when working on localhost
     QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->ipTextBox->setText(ipAddress);
     else
         ui->ipTextBox->setText("localhost");
-    */
+    //*/
 }
 
 MainWindow::~MainWindow()
@@ -109,11 +109,6 @@ void MainWindow::on_m4slider_valueChanged(int value)
     updateServer();
 }
 
-void MainWindow::on_sendHellobutton_clicked()
-{
-
-}
-
 void MainWindow::on_connectButton_clicked()
 {
 	if(hSocket)
@@ -127,14 +122,6 @@ void MainWindow::on_connectButton_clicked()
 	hSocket->doConnect();
 }
 
-void MainWindow::on_sendHelloButton_clicked()
-{
-	if(!hSocket)
-			return;
-
-	this->hSocket->write("Hello, once again!");
-}
-
 void MainWindow::updateServer()
 {
 	if(!hSocket)
@@ -142,7 +129,6 @@ void MainWindow::updateServer()
 		qDebug() << "Connect first...";
 		return;
 	}
-
 
     //Build the string we want to send via network
     //I will use JSON
@@ -222,8 +208,6 @@ void MainWindow::joystick_moved(double x, double y)
 	//qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
 	this->ui->speedSlider->setValue( map(y, -1.00000, 1.00000, -255, +255) );
 	this->ui->directionSlider->setValue( map(x, -1.00000, 1.00000, -255, +255) );
-
-
 }
 
 void MainWindow::serverConnectionChanged(bool status)
@@ -235,6 +219,6 @@ void MainWindow::on_disconnectButton_clicked()
 {
 	if(!hSocket)
 			return;
-	//???
-	//hSocket->disconnected();
+
+    this->hSocket->doDisconnect();
 }

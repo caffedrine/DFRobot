@@ -30,10 +30,11 @@ private slots:
     void on_m3slider_valueChanged(int value);
     void on_m4slider_valueChanged(int value);
 
-    void on_sendHellobutton_clicked();
+    //Buttons signals
     void on_connectButton_clicked();
+    void on_disconnectButton_clicked();
 
-    void on_sendHelloButton_clicked();
+    //Direction-Speed sliders signals
 	void on_speedSlider_valueChanged(int value);
 	void on_directionSlider_valueChanged(int value);
 	void on_emergencyButton_clicked();
@@ -44,8 +45,6 @@ private slots:
 	void updateServer();
 	void updateSpeedGauge(int val);
 	void delay(long milis);
-
-	void on_disconnectButton_clicked();
 
 public slots:
 	void serverConnectionChanged(bool);

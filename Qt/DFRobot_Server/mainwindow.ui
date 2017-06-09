@@ -58,19 +58,6 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_connectArduino">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>131</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Connect</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="pushButton_disconnectArduino">
      <property name="geometry">
       <rect>
@@ -160,6 +147,19 @@
      </property>
      <property name="text">
       <string>NOT CONNECTED</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_connectArduino">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>131</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Connect</string>
      </property>
     </widget>
    </widget>
@@ -752,7 +752,7 @@
      <x>0</x>
      <y>0</y>
      <width>883</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -768,38 +768,6 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections>
-  <connection>
-   <sender>pushButton_connectArduino</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>pushButton_connect_onClick()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>210</x>
-     <y>129</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>437</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_connectArduino</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>on_pushButton_connectArduino_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>139</x>
-     <y>139</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>227</x>
-     <y>173</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>pushButton_maxMotors</sender>
    <signal>clicked()</signal>

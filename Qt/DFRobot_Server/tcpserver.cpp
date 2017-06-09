@@ -98,7 +98,9 @@ qint64 TcpServer::write(QString msg)
         return -1;
     }
 
-    const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
+    //const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
+    const QByteArray bytesToSend = QByteArray::fromHex( msg.toUtf8() ); //under windows
+
     return this->socket->write(bytesToSend);
 }
 

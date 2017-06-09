@@ -418,19 +418,6 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="sendHelloButton">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>500</y>
-      <width>85</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Send hello!</string>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
@@ -447,12 +434,16 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>20</y>
        <width>211</width>
-       <height>171</height>
+       <height>191</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout"/>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
+     </layout>
     </widget>
     <widget class="QSlider" name="directionSlider">
      <property name="geometry">
@@ -568,7 +559,7 @@
      <x>0</x>
      <y>0</y>
      <width>506</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

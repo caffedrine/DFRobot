@@ -6,8 +6,9 @@ import QtQuick.Extras.Private 1.0
 
 Rectangle
 {
-    width: 205
-    height: 205
+    id: root
+    width: circular_gauge.width + 5
+    height: circular_gauge.height + 5
     color: "#494d53"
 
     anchors.horizontalCenter: parent.horizontalCenter
@@ -15,6 +16,7 @@ Rectangle
 
     CircularGauge
     {
+        id: circular_gauge
         objectName: "circular_gauge"
 
         width: 200

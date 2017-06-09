@@ -43,7 +43,7 @@ void TcpSocket::connected()
     qDebug() << "connected...";
 
     // Hey server, tell me about you.
-    socket->write("Hello! I'am the RC!\r\n");
+    socket->write("RECV: RC Connected!");
 }
 
 void TcpSocket::disconnected()
@@ -67,7 +67,8 @@ void TcpSocket::readyRead()
 
 void TcpSocket::write(QString msg)
 {
-    const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
+    //const QByteArray bytesToSend = QByteArray::fromStdString( msg.toStdString() );
+    const QByteArray bytesToSend = QByteArray::fromHex( msg.toUtf8() ); //under windows
     this->socket->write(bytesToSend);
 }
 
@@ -80,4 +81,9 @@ bool TcpSocket::isAvailable()
         return true;
     else
         return false;
+}
+
+void TcpSocket::doDisconnect()
+{
+    this->socket->disconnectFromHost();
 }
