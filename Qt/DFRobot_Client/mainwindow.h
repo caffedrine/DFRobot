@@ -6,6 +6,7 @@
 #include <QtQuick/QtQuick>
 
 #include "tcpsocket.h"
+#include "../libs/datastructure.h"
 
 namespace Ui
 {
@@ -56,6 +57,9 @@ private:
 	//Gauge speedometter
 	QQuickView *viewGauge;
 	QWidget *containerGauge;
+
+    //Data structure handler
+    //DataStructure data = new DataStructure(4, 0, 250);
 
 };
 
