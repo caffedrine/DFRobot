@@ -3,10 +3,17 @@
  * This way we make sure we gonna use exactly the same data structure in all project
 */
 
-#include <string>
+//Van't use #include <string> as it is different on AVR.
 
 #ifndef DATASTRUCTURE_H
 #define DATASTRUCTURE_H
+
+#include <string>
+
+#ifdef _ARD_    //Make sure code is compatible with arduino
+    #include <Arduino.h>        //Including arduino libs
+    #define std::string String  //Make conversion between String and std::string
+#endif
 
 class DataStructure
 {
@@ -18,7 +25,6 @@ class DataStructure
 
     }DIRECTION;
 
-
     //Delimiters and tokens used to generate and parse recv/send data
     struct GLOBALS
     {
@@ -26,21 +32,21 @@ class DataStructure
         //By default, data structure will look in the following way:
         //  >>[paramIdentifier,{value1-value2}]|[paraIdentifier2,{value1-value2...}<<
 
-        static const char startToken         = '>'; //Data start token
-        static const char blocksDelimiter    = '|';  //Data blocks delimiter
-        static const char endToken           = '<'; //Data end token
+        static const char startToken            = '>'; //Data start token
+        static const char blocksDelimiter       = '|';  //Data blocks delimiter
+        static const char endToken              = '<'; //Data end token
 
-        static const char leftToken          = '[';  //Data block start token
-        static const char paramsDelimiter    = ',';  //Parameters values delimiter
-        static const char rightToken         = ']';  //Data block end token
+        static const char blockLeftToken        = '[';  //Data block start token
+        static const char blocksParamsDelimiter = ',';  //Parameters values delimiter
+        static const char blocksRightToken      = ']';  //Data block end token
 
-        static const char valuesLeftToken    = '{';  //Values right token
-        static const char valuesDelimiter    = '-';  //Multiple values have this delimiter
-        static const char valuesRightToken   = '}';  //Values left token
+        static const char valuesLeftToken       = '{';  //Values right token
+        static const char valuesDelimiter       = '-';  //Multiple values have this delimiter
+        static const char valuesRightToken      = '}';  //Values left token
 
-        static const char motorIdentifier    = 'm';  //Motors identifier token
-        static const char speedIdentifier    = 's';  //Speed identifier token
-        static const char directionIdentifier= 'd';  //Direction identifier token
+        static const char motorIdentifier       = 'm';  //Motors identifier token
+        static const char speedIdentifier       = 's';  //Speed identifier token
+        static const char directionIdentifier   = 'd';  //Direction identifier token
 
         //Other values
         static const int MAX_MOTORS = 8; //maximum numbers of motors
@@ -78,7 +84,23 @@ public:
     bool parseDataString(std::string *data);
     std::string getDataString();
 
+    //Util functions used functions to make life easier
+    static int getNumberOfChars(const std::string &str, char checkCharacter);
+    static int getIndexOfNth(const std::string &str, char caracter, int index = 0);
+    static std::string getStringPartByNr(const std::string &data, char separator, int index);
+    static std::string to_string(int i);
+    static int to_int(std::string);
+
 private:
+    //Final builded message will be an array of blocks - let's define structure of a block
+//    typedef struct BLOCK
+//    {
+//        std::string param_name;
+//        int values_number;
+//        std::string values[values_number?];
+//    };
+
+
     //Number of motors we actually have;
     int motorsNumber;
 
@@ -94,14 +116,15 @@ private:
     //A variable to store direction
     Direction direction;
 
+    //Define store data string builded wight here
+    std::string sendData = "";  //output string. This is what should be send to other terminals
+
+    //Last string parsed is stored here
+    std::string recvData = "";  //This string is received and parsed
+
     //Integrity data handler - basic checks in order to make sure that received data is valid
     bool checkDataIntegrity(std::string *data);
     bool repairCorruptedData(std::string *data);
-
-    //Used functions to make life easier
-    static int getNumarDeAparitii(char caracter);
-    static int getIndexOfNth(char caracter, int index);
-
 };
 
 #endif // DATASTRUCTURE_H
