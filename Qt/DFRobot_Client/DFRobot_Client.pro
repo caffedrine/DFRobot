@@ -33,7 +33,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     tcpsocket.h \
-    datastructure.h \
     ../libs/datastructure.h
 
 FORMS    += mainwindow.ui
