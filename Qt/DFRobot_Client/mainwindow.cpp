@@ -222,3 +222,8 @@ void MainWindow::on_disconnectButton_clicked()
 
     this->hSocket->doDisconnect();
 }
+
+void MainWindow::on_testButton_clicked()
+{
+    DataStructure data;
+}

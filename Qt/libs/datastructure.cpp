@@ -109,6 +109,26 @@ std::string DataStructure::getDataString()
     }
 
     //That's all for now! Feel free to add auxiliar params in the same way ^_^
+    /*
+    if(val_changed_since_last_time)
+    {
+        if(data.length() >=5)
+            data += GLOBALS::blocksParamsDelimiter;
+
+        data += GLOBALS::blockLeftToken;
+        {
+            data += GLOBALS::yout_value_identifier;
+            data += GLOBALS::blocksDelimiter;
+            data += GLOBALS::valuesLeftToken;
+            {
+                data += your_value
+            }
+            data+=GLOBALS::valuesRightToken;
+
+        }
+        data += GLOBALS::blocksRightToken;
+    }
+    */
 }
 
 //   _   _   _____   ___   _       ____
@@ -180,4 +200,15 @@ std::string DataStructure::to_string(int val)
 int DataStructure::to_int(std::string str)
 {
     return atoi(str.c_str());
+}
+
+//      ____      _                          _    ____       _
+//     / ___| ___| |_ ___     __ _ _ __   __| |  / ___|  ___| |_ ___
+//    | |  _ / _ \ __/ __|   / _` | '_ \ / _` |  \___ \ / _ \ __/ __|
+//    | |_| |  __/ |_\__ \  | (_| | | | | (_| |   ___) |  __/ |_\__ \
+//     \____|\___|\__|___/   \__,_|_| |_|\__,_|  |____/ \___|\__|___/
+
+Motor DataStructure::getMotorInfo(int motorId)
+{
+
 }

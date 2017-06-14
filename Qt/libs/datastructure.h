@@ -3,14 +3,12 @@
  * This way we make sure we gonna use exactly the same data structure in all project
 */
 
-//Van't use #include <string> as it is different on AVR.
-
 #ifndef DATASTRUCTURE_H
 #define DATASTRUCTURE_H
 
 #include <string>
 
-#ifdef _ARD_    //Make sure code is compatible with arduino
+#ifdef _ARD_    //Make sure code is compatible with Arduino
     #include <Arduino.h>        //Including arduino libs
     #define std::string String  //Make conversion between String and std::string
 #endif
@@ -59,7 +57,13 @@ class DataStructure
     {
         int id;                         //Unique identifier for every motor
         int speed, lastSpeed;           //It is used as offset if packet also contain speed/direction packet
-        int direction, lastDirection;   //Also used as offset if motor contain speed/direction packet
+        DIRECTION direction, lastDirection;   //Also used as offset if motor contain speed/direction packet
+
+        int getId() { return id; }
+        int getCurrentSpeed() { return speed; }
+        int getLastSpeed() { return lastSpeed; }
+        DIRECTION getCurrentDirection() { return direction; }
+        DIRECTION getLastDirection() { return lastDirection; }
 
     }Motor;
 
@@ -69,6 +73,10 @@ class DataStructure
         int lastVal;        //Last speed
         int currentVal;     //Current motor speed
 
+        //And some usefull methods in case we want just a value
+        int getCurrentVal() { return currentVal; }
+        int getLastVal() { return lastVal; }
+
     }Speed;
 
     //Direction data structure
@@ -77,12 +85,30 @@ class DataStructure
         DIRECTION lastVal;      //Last motor direction
         DIRECTION currentVal;   //Current motor direction
 
+        //Methods
+        DIRECTION getLastVal() { return lastVal; }
+        DIRECTION getCurrentVal() { return currentVal; }
+
     }Direction;
 
 public:
     DataStructure(int motors_number = 4, int valMin = 0, int valMax = 255);
     bool parseDataString(std::string *data);
     std::string getDataString();
+
+    //Gets and sets
+
+    //Motors params
+    Motor getMotorInfo(int motorId);
+    void setMotorInfo(int motorID, int speed, int direction);
+
+    //Car speed
+    Speed getSpeed();
+    void setSpeed(int speed);
+
+    //Car direction
+    Direction getDirection();
+    void setDirection(Direction, direction);
 
     //Util functions used functions to make life easier
     static int getNumberOfChars(const std::string &str, char checkCharacter);
