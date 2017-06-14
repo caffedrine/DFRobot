@@ -47,6 +47,8 @@ private slots:
 	void updateSpeedGauge(int val);
 	void delay(long milis);
 
+    void on_testButton_clicked();
+
 public slots:
 	void serverConnectionChanged(bool);
 

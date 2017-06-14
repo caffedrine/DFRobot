@@ -15,6 +15,7 @@
 
 class DataStructure
 {
+public:
     //Convention for direction backward/forward values
     typedef enum DIRECTION
     {
@@ -39,12 +40,12 @@ class DataStructure
         static const char blocksRightToken      = ']';  //Data block end token
 
         static const char valuesLeftToken       = '{';  //Values right token
-        static const char valuesDelimiter       = '-';  //Multiple values have this delimiter
+        static const char valuesDelimiter       = ';';  //Multiple values have this delimiter
         static const char valuesRightToken      = '}';  //Values left token
 
         static const char motorIdentifier       = 'm';  //Motors identifier token
         static const char speedIdentifier       = 's';  //Speed identifier token
-        static const char directionIdentifier   = 'd';  //Direction identifier token
+        static const char steeringIdentifier    = 'd';  //Direction/Steering identifier token
 
         //Other values
         static const int MAX_MOTORS = 8; //maximum numbers of motors
@@ -55,15 +56,9 @@ class DataStructure
     //Motor data structure
     typedef struct
     {
-        int id;                         //Unique identifier for every motor
-        int speed, lastSpeed;           //It is used as offset if packet also contain speed/direction packet
-        DIRECTION direction, lastDirection;   //Also used as offset if motor contain speed/direction packet
-
-        int getId() { return id; }
-        int getCurrentSpeed() { return speed; }
-        int getLastSpeed() { return lastSpeed; }
-        DIRECTION getCurrentDirection() { return direction; }
-        DIRECTION getLastDirection() { return lastDirection; }
+        int id;                                 //Unique identifier for every motor
+        int speed, lastSpeed;                   //It is used as offset if packet also contain speed/direction packet
+        DIRECTION direction, lastDirection;     //Also used as offset if motor contain speed/direction packet
 
     }Motor;
 
@@ -73,42 +68,34 @@ class DataStructure
         int lastVal;        //Last speed
         int currentVal;     //Current motor speed
 
-        //And some usefull methods in case we want just a value
-        int getCurrentVal() { return currentVal; }
-        int getLastVal() { return lastVal; }
-
     }Speed;
 
     //Direction data structure
     typedef struct
     {
-        DIRECTION lastVal;      //Last motor direction
-        DIRECTION currentVal;   //Current motor direction
+        int lastVal;      //Last motor direction
+        int currentVal;   //Current motor direction
 
-        //Methods
-        DIRECTION getLastVal() { return lastVal; }
-        DIRECTION getCurrentVal() { return currentVal; }
+    }Steering;
 
-    }Direction;
-
-public:
-    DataStructure(int motors_number = 4, int valMin = 0, int valMax = 255);
-    bool parseDataString(std::string *data);
+    //Public methods and constructor
+    DataStructure(int motors_number = 4);
+    bool parseDataString(std::string &data);
     std::string getDataString();
 
     //Gets and sets
 
     //Motors params
     Motor getMotorInfo(int motorId);
-    void setMotorInfo(int motorID, int speed, int direction);
+    void setMotorInfo(int motorID, int speed, DataStructure::DIRECTION direction);
 
     //Car speed
     Speed getSpeed();
     void setSpeed(int speed);
 
     //Car direction
-    Direction getDirection();
-    void setDirection(Direction, direction);
+    Steering getSteering();
+    void setSteering(int steering);
 
     //Util functions used functions to make life easier
     static int getNumberOfChars(const std::string &str, char checkCharacter);
@@ -126,12 +113,8 @@ private:
 //        std::string values[values_number?];
 //    };
 
-
     //Number of motors we actually have;
     int motorsNumber;
-
-    //Maximum and minimum speed/offset for motors. Basically, all values have to fit in this interval
-    int val_min, val_max;
 
     //Array of motors. Max size is defined in GLOBALS structure;
     Motor motors[GLOBALS::MAX_MOTORS];
@@ -140,7 +123,7 @@ private:
     Speed speed;
 
     //A variable to store direction
-    Direction direction;
+    Steering steering;
 
     //Define store data string builded wight here
     std::string sendData = "";  //output string. This is what should be send to other terminals
@@ -149,8 +132,8 @@ private:
     std::string recvData = "";  //This string is received and parsed
 
     //Integrity data handler - basic checks in order to make sure that received data is valid
-    bool checkDataIntegrity(std::string *data);
-    bool repairCorruptedData(std::string *data);
+    bool checkDataIntegrity(std::string &data);
+    bool repairCorruptedData(std::string &data);
 };
 
 #endif // DATASTRUCTURE_H

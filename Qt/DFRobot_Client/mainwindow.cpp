@@ -225,5 +225,25 @@ void MainWindow::on_disconnectButton_clicked()
 
 void MainWindow::on_testButton_clicked()
 {
-    DataStructure data;
+    DataStructure data(4);
+    //DataStructure *data = new DataStructure(4); //It may be problematic on Arduino
+
+    data.setMotorInfo(1, 100, DataStructure::DIRECTION::FORWARD);
+    data.setMotorInfo(2, 200, DataStructure::DIRECTION::FORWARD);
+    data.setMotorInfo(3, 300, DataStructure::DIRECTION::BACKWARD);
+    data.setMotorInfo(4, 400, DataStructure::DIRECTION::BACKWARD);
+
+    qDebug() << "Motors INFO:";
+    for(int i=1; i <= 4; i++)
+    {
+        qDebug() << "Motor ID: " << data.getMotorInfo(i).id << " Speed: " << data.getMotorInfo(i).speed << " Direction: " << (data.getMotorInfo(i).direction);// == DataStructure::DIRECTION::FORWARD)?"FORWARD":"BACKWARD";
+    }
+
+    data.setSpeed(255);
+    qDebug() << "Car speed: " << data.getSpeed().currentVal;
+
+    data.setSteering(123);
+    qDebug() << "Steering: " << data.getSteering().currentVal;
+
+    qDebug() << "BUILD: " << QString::fromStdString( data.getDataString() ) << "\n";
 }
