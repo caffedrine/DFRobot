@@ -248,6 +248,8 @@ void MainWindow::on_testButton_clicked()
     const std::string str = data.buildDataString();
     qDebug() << "BUILD: " << QString::fromStdString( str );
 
+
+    //Proceed with parsing a recv string
     qDebug() << "PARSING: " << ((data.parseDataString( str ))?"SUCCESS":"FAILED");
 
     qDebug() << "NEW VALUES:";
