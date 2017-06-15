@@ -1,5 +1,9 @@
 #include "datastructure.h"
 
+#include <QDebug>
+#include <QString>
+
+
 DataStructure::DataStructure(int motors_number)
 {
     //Setting up and validating number of motors
@@ -29,123 +33,141 @@ DataStructure::DataStructure(int motors_number)
     this->steering.currentVal = 0;
 }
 
-std::string DataStructure::getDataString()
+std::string DataStructure::buildDataString()
 {
-    std::string data = "";
+    //We have to return a string
+    std::string buildedString = "";
 
-    //At the end, we get something like this:
-    //  >[m1,{1;100}]|[m2,{1;200}]|[m3,{0;300}]|[m4,{0;400}]|[s,{255}]|[d,{123}]<
+    //Blocks array we have to pass
+    BLOCK_STRUCT blocks[GLOBALS::MAX_BLOCKS_NUMBER];
 
-    //Adding first token
-    data += GLOBALS::startToken;
+    //Populating array with blocks
 
-    //Proceed next to add elements blocks
-    //Starting with motors blocks
+    //Adding motors blocks
     for(int i=1; i<=this->motorsNumber; i++)
     {
         //Update only motors with values changed since last time
         if(this->motors[i].speed != this->motors[i].lastSpeed || this->motors[i].direction != this->motors[i].lastDirection)
         {
-            data += GLOBALS::blockLeftToken;
-            {
-                data += GLOBALS::motorIdentifier; data += this->to_string(i);
-                data += GLOBALS::blocksParamsDelimiter;
-                data += GLOBALS::valuesLeftToken;
-                {
-                    data += this->to_string(this->motors[i].direction);
-                    data += GLOBALS::valuesDelimiter;
-                    data += this->to_string(this->motors[i].speed);
-                }
-                data+=GLOBALS::valuesRightToken;
-            }
-            data += GLOBALS::blocksRightToken;
-            data += GLOBALS::blocksDelimiter;
+            std::string *values = motors[i].to_array();
+            blocks[i-1].build( (const char)GLOBALS::motorIdentifier, values);
+            delete[] values;
         }
     }
 
-    //Because we can't be sure motors values changed since last time
-    if(data.length() >= 5)
-        data = data.substr(0, data.length() - 1);   //we may just want to delete latest delimiter;
-
-    //Adding speed only if it has been changed
-    if(this->speed.currentVal != this->speed.lastVal)
+    //Speed
+    if(speed.currentVal != speed.lastVal)
     {
-        if(data.length() >=5)
-            data += GLOBALS::blocksDelimiter;
-
-        data += GLOBALS::blockLeftToken;
-        {
-            data += GLOBALS::speedIdentifier;
-            data += GLOBALS::blocksParamsDelimiter;
-            data += GLOBALS::valuesLeftToken;
-            {
-                data += this->to_string(this->speed.currentVal);
-            }
-            data+=GLOBALS::valuesRightToken;
-
-        }
-        data += GLOBALS::blocksRightToken;
+        //Use this to prevent memory leak - we can delete this obj
+        std::string *values = speed.to_array();
+        blocks[4].build( (const char)GLOBALS::speedIdentifier, values );
+        delete[] values;
     }
 
-    //Adding direction only if it has changed since last time
-    if(this->steering.currentVal != this->steering.lastVal)
+    //Steering
+    if(steering.currentVal != steering.lastVal)
     {
-        //Add blocks delimiter only if we already have a block before
-       if(data.length() >=5)
-           data += GLOBALS::blocksDelimiter;
-
-        data += GLOBALS::blockLeftToken;
-        {
-            data += GLOBALS::steeringIdentifier;
-            data += GLOBALS::blocksParamsDelimiter;
-            data += GLOBALS::valuesLeftToken;
-            {
-                data += this->to_string(this->steering.currentVal);
-            }
-            data+=GLOBALS::valuesRightToken;
-
-        }
-        data += GLOBALS::blocksRightToken;
+        std::string *values = steering.to_array();
+        blocks[5].build( (const char)GLOBALS::steeringIdentifier, steering.to_array() );
+        delete[] values; //Don;t judge me! Adruino does not support smart pointers!!!
     }
 
-    //That's all for now! Feel free to add auxiliar params in the same way ^_^
-    /*
-    if(val_changed_since_last_time)
+    //Add custom values following the above pattern
+
+    //Add your custom data here
+    // blocks[6].build() or blocks[6].parse()
+    //At the end, we get something like this
+    // ">[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<"
+
+
+    //Procees with bulding the string we want to send
+    buildedString += GLOBALS::startToken;
+    for(int i=0; i < GLOBALS::MAX_BLOCKS_NUMBER; i++)
     {
-        if(data.length() >=5)
-            data += GLOBALS::blocksDelimiter;
-
-        data += GLOBALS::blockLeftToken;
+        if( !(blocks[i].isEmpty()) )
         {
-            data += GLOBALS::yout_value_identifier;
-            data += GLOBALS::blocksParamsDelimiter;
-            data += GLOBALS::valuesLeftToken;
-            {
-                data += your_value
-            }
-            data+=GLOBALS::valuesRightToken;
-
+            buildedString += blocks[i].to_string();
+            if(!blocks[i+1].isEmpty())
+                buildedString += GLOBALS::blocksDelimiter;
         }
-        data += GLOBALS::blocksRightToken;
+        else
+            break;
     }
-    */
-
-    //Don't forget about final token
-    data += GLOBALS::endToken;
-    return data;
+    buildedString += GLOBALS::endToken;
+    return buildedString;
 }
 
 bool DataStructure::parseDataString(std::string &data)
 {
     //this function receive data and have to parse it
-    if(  )
+    if( this->checkDataIntegrity(data) == false )
+        return false;
+    //qDebug() << QString::fromStdString( getParamByName(data, 'm', 2) );
+    //Regex like a boss? Naa, not on arduino :(
+    return true;
 }
 
-bool DataStructure::checkDataIntegrity(std::string &data)
+bool DataStructure::checkDataIntegrity(const std::string &data)
 {
     //function to perform basic data integrity check in order to make sure we didn't receive garbage
-    if(getNumberOfChars(data, this->GLOBALS::blockLeftToken) == getNumberOfChars(data, this->GLOBALS::blocksRightToken))
+
+    //Make sure we have first and last token
+    if(this->getNumberOfChars(data, GLOBALS::startToken) < 1 ||  this->getNumberOfChars(data, GLOBALS::endToken) < 1)
         return false;
+
+    //Make sure we have blocks
+    if(this->getNumberOfChars(data, GLOBALS::blockLeftToken) != this->getNumberOfChars(data, GLOBALS::blocksRightToken))
+        return false;
+
+    //Checking values paranthesis validity
+    if(this->getNumberOfChars(data, GLOBALS::valuesLeftToken) != this->getNumberOfChars(data, GLOBALS::valuesRightToken))
+        return false;
+
+    //Make sure block contain parameter name and values
+    if(this->getNumberOfChars(data, GLOBALS::valuesLeftToken) != this->getNumberOfChars(data, GLOBALS::blocksParamsDelimiter))
+        return false;
+
+    if(this->getNumberOfChars(data, GLOBALS::valuesLeftToken)-1 != this->getNumberOfChars(data, GLOBALS::blocksDelimiter) )
+        return false;
+
+    //Matemathical poly functions can be used here if you wanna be a GURU :))
+
+    return true;
+}
+
+DataStructure::BLOCK_STRUCT DataStructure::getParamByName(const std::string &data, const char &name, int id)
+{
+    DataStructure::BLOCK_STRUCT block;
+
+    int blocks_number = getNumberOfChars(data, GLOBALS::blocksDelimiter) + 1;
+
+    //process every block
+    for(int i=0; i < blocks_number; i++)
+    {
+        std::string currentBlock = this->getStringPartByNr(data, GLOBALS::blocksDelimiter, i);
+
+        //remove first and last token
+        if(i == 0) currentBlock = currentBlock.substr(1);
+        if(i == (blocks_number - 1)) currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
+
+        //Removing block delimiters
+        currentBlock = currentBlock.substr( 1 );
+        currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
+
+        //Getting param name and values
+        std::string paramName = this->getStringPartByNr(currentBlock, GLOBALS::blocksParamsDelimiter, 0);
+        std::string paramValues = this->getStringPartByNr(currentBlock, GLOBALS::blocksParamsDelimiter, 1);
+
+        //remove values right and left tokens
+        paramValues = paramValues.substr(1);
+        paramValues = paramValues.substr(0, paramValues.length() - 1);
+
+        //Processing params and values
+
+
+        break;
+    }
+    return block;
 }
 
 //   _   _   _____   ___   _       ____
