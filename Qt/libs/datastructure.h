@@ -73,6 +73,15 @@ public:
             return values;
         }
 
+        void parse(std::string *data)
+        {
+            lastSpeed = speed;
+            lastDirection = direction;
+
+            direction = (DIRECTION)to_int(data[1]);
+            speed = to_int(data[2]);
+        }
+
     }Motor;
 
     //Speed data structure
@@ -86,6 +95,12 @@ public:
             std::string *values = new std::string[GLOBALS::MAX_PARAMS_NUMBER];
             values[0] = to_string(currentVal);
             return values;
+        }
+
+        void parse(std::string *data)
+        {
+            lastVal = currentVal;
+            currentVal = to_int(data[0]);
         }
 
     }Speed;
@@ -102,6 +117,13 @@ public:
             values[0] = to_string(currentVal);
             return values;
         }
+
+        void parse(std::string *data)
+        {
+            lastVal = currentVal;
+            currentVal = to_int(data[0]);
+        }
+
     }Steering;
 
     //Public methods and constructor
@@ -163,12 +185,38 @@ private:
             }
             str += GLOBALS::valuesRightToken;
             str += GLOBALS::blocksRightToken;
-            return str;
+            return str; // Format: [m,{4;0;400}]
         }
 
         void parse(const std::string &data)
         {
-            //decode received data
+            //decode received data - formet used is the one used in to_string() function
+            //Removing block delimiters
+            std::string tmp = data;
+
+            tmp = tmp.substr( 1 );
+            tmp = tmp.substr(0, tmp.length() - 1);
+
+            //Getting param name and values
+            std::string paramName = getStringPartByNr(tmp, GLOBALS::blocksParamsDelimiter, 0);
+            std::string paramValues = getStringPartByNr(tmp, GLOBALS::blocksParamsDelimiter, 1);
+
+            //remove values right and left tokens
+            paramValues = paramValues.substr(1);
+            paramValues = paramValues.substr(0, paramValues.length() - 1);
+
+            //Get number of values we received
+            int values_number = getNumberOfChars(paramValues, GLOBALS::valuesDelimiter) + 1;
+
+            //fill variables with received values
+            param_name = paramName[0];
+
+
+            for(int i=0; i <values_number; i++)
+            {
+                param_values[i] = getStringPartByNr(paramValues, GLOBALS::valuesDelimiter, i);
+            }
+
         }
 
         void build(const char &param_nm, std::string *param_vals)

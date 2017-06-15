@@ -102,8 +102,40 @@ bool DataStructure::parseDataString(std::string &data)
     //this function receive data and have to parse it
     if( this->checkDataIntegrity(data) == false )
         return false;
-    //qDebug() << QString::fromStdString( getParamByName(data, 'm', 2) );
+
+    //EXAMPLE: >[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<
     //Regex like a boss? Naa, not on arduino :(
+
+    //We convert the received string to an array of blocks in order to process it easily
+    BLOCK_STRUCT blocks[GLOBALS::MAX_BLOCKS_NUMBER];
+
+    //Getting number of blocks
+    int blocks_number = getNumberOfChars(data, GLOBALS::blocksDelimiter) + 1;
+
+    //process every block
+    for(int i=0; i < blocks_number; i++)
+    {
+        std::string currentBlock = this->getStringPartByNr(data, GLOBALS::blocksDelimiter, i);
+
+        //remove first and last token
+        if(i == 0) currentBlock = currentBlock.substr(1);
+        if(i == (blocks_number - 1)) currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
+
+        blocks[i].parse(data);
+    }
+
+    //We got an array of blocks. Now we may want to fill our variables
+    for(int i=0; i <= GLOBALS::MAX_BLOCKS_NUMBER; i++)
+    {
+        if(!blocks[i].isEmpty())
+        {
+            qDebug() << "RECV BLOCKS: " << blocks[i].to_string();
+        }
+        else
+            break;
+    }
+
+
     return true;
 }
 

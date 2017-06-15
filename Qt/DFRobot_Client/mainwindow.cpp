@@ -248,7 +248,7 @@ void MainWindow::on_testButton_clicked()
     qDebug() << "BUILD: " << QString::fromStdString( data.buildDataString() );
 
 
-    //std::string str = ">[m1,{1;100}]|[m2,{1;200}]|[m3,{0;300}]|[m4,{0;400}]|[s,{255}]|[d,{123}]<";
-    //qDebug() << "PARSING: " << ((data.parseDataString(str))?"SUCCESS":"FAILED");
+    std::string str = ">[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<";
+    qDebug() << "PARSING: " << ((data.parseDataString(str))?"SUCCESS":"FAILED");
 
 }
