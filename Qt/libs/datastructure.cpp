@@ -97,7 +97,7 @@ std::string DataStructure::buildDataString()
     return buildedString;
 }
 
-bool DataStructure::parseDataString(std::string &data)
+bool DataStructure::parseDataString(const std::string &data)
 {
     //this function receive data and have to parse it
     if( this->checkDataIntegrity(data) == false )
@@ -121,20 +121,23 @@ bool DataStructure::parseDataString(std::string &data)
         if(i == 0) currentBlock = currentBlock.substr(1);
         if(i == (blocks_number - 1)) currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
 
-        blocks[i].parse(data);
+        blocks[i].parse(currentBlock);
     }
 
     //We got an array of blocks. Now we may want to fill our variables
-    for(int i=0; i <= GLOBALS::MAX_BLOCKS_NUMBER; i++)
-    {
-        if(!blocks[i].isEmpty())
-        {
-            qDebug() << "RECV BLOCKS: " << blocks[i].to_string();
-        }
-        else
-            break;
-    }
 
+    //Fill up the speed
+    this->setSpeed( to_int( getParamsByName(blocks, (const char)GLOBALS::speedIdentifier).param_values[0] ) );
+
+    //Fill up steering
+    this->setSteering( to_int( getParamsByName(blocks, (const char)GLOBALS::steeringIdentifier).param_values[0] ) );
+
+    //Filling up motors values
+    for(int i=1; i <= motorsNumber; i++)
+    {
+        BLOCK_STRUCT motorBlock = getParamsByName(blocks, (const char)GLOBALS::motorIdentifier, i);
+        setMotorInfo(i, to_int(motorBlock.param_values[2]), (DIRECTION)to_int(motorBlock.param_values[1]));
+    }
 
     return true;
 }
@@ -167,52 +170,43 @@ bool DataStructure::checkDataIntegrity(const std::string &data)
     return true;
 }
 
-DataStructure::BLOCK_STRUCT DataStructure::getParamByName(const std::string &data, const char &name, int id)
+DataStructure::BLOCK_STRUCT DataStructure::getParamsByName(BLOCK_STRUCT *blocks, const char &name, int id)
 {
     DataStructure::BLOCK_STRUCT block;
-
-    int blocks_number = getNumberOfChars(data, GLOBALS::blocksDelimiter) + 1;
-
-    //process every block
-    for(int i=0; i < blocks_number; i++)
+    for(int i=0; i < GLOBALS::MAX_BLOCKS_NUMBER; i++)
     {
-        std::string currentBlock = this->getStringPartByNr(data, GLOBALS::blocksDelimiter, i);
-
-        //remove first and last token
-        if(i == 0) currentBlock = currentBlock.substr(1);
-        if(i == (blocks_number - 1)) currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
-
-        //Removing block delimiters
-        currentBlock = currentBlock.substr( 1 );
-        currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
-
-        //Getting param name and values
-        std::string paramName = this->getStringPartByNr(currentBlock, GLOBALS::blocksParamsDelimiter, 0);
-        std::string paramValues = this->getStringPartByNr(currentBlock, GLOBALS::blocksParamsDelimiter, 1);
-
-        //remove values right and left tokens
-        paramValues = paramValues.substr(1);
-        paramValues = paramValues.substr(0, paramValues.length() - 1);
-
-        //Processing params and values
-
-
-        break;
+        if(!blocks[i].isEmpty())
+        {
+            if(blocks[i].param_name == name)
+            {
+                if(id != -1)
+                {
+                    if(blocks[i].param_values[0] == to_string(id))
+                        return blocks[i];
+                }
+                else
+                {
+                    return blocks[i];
+                }
+            }
+        }
+        else
+            return block;
     }
     return block;
 }
-
+/*
 //   _   _   _____   ___   _       ____
 //  | | | | |_   _| |_ _| | |     / ___|
 //  | | | |   | |    | |  | |     \___ \
 //  | |_| |   | |    | |  | |___   ___) |
 //   \___/    |_|   |___| |_____| |____/
-
+*/
 int DataStructure::getNumberOfChars(const std::string &source, char character)
 {
     int count = 0;
 
-    for (int i = 0; i < source.length(); i++)
+    for (size_t i = 0; i < source.length(); i++)
     {
         if (source[i] == character)
         {
@@ -220,11 +214,6 @@ int DataStructure::getNumberOfChars(const std::string &source, char character)
         }
     }
     return count;
-}
-
-int DataStructure::getIndexOfNth(const std::string &source, char character, int index)
-{
-    return 0;
 }
 
 std::string DataStructure::getStringPartByNr(const std::string &data, char separator, int index)
@@ -235,7 +224,7 @@ std::string DataStructure::getStringPartByNr(const std::string &data, char separ
     int stringData = 0;        //variable to count data part nr
     std::string dataPart = "";      //variable to hole the return text
 
-    for (int i = 0; i <= data.length() - 1; i++)
+    for (size_t i = 0; i <= data.length() - 1; i++)
     {
         //Walk through the text one letter at a time
         if (data[i] == separator)
@@ -273,12 +262,13 @@ int DataStructure::to_int(std::string str)
     return atoi(str.c_str());
 }
 
+/*
 //      ____      _                          _    ____       _
 //     / ___| ___| |_ ___     __ _ _ __   __| |  / ___|  ___| |_ ___
 //    | |  _ / _ \ __/ __|   / _` | '_ \ / _` |  \___ \ / _ \ __/ __|
 //    | |_| |  __/ |_\__ \  | (_| | | | | (_| |   ___) |  __/ |_\__ \
 //     \____|\___|\__|___/   \__,_|_| |_|\__,_|  |____/ \___|\__|___/
-
+*/
 DataStructure::Motor DataStructure::getMotorInfo(int motorId)
 {
     //In case validation is required

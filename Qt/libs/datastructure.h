@@ -128,7 +128,7 @@ public:
 
     //Public methods and constructor
     DataStructure(int motors_number = 4);
-    bool parseDataString(std::string &data);
+    bool parseDataString(const std::string &data);
     std::string buildDataString();
 
     //Gets and sets
@@ -147,7 +147,6 @@ public:
 
     //Util functions used functions to make life easier
     static int getNumberOfChars(const std::string &str, char checkCharacter);
-    static int getIndexOfNth(const std::string &str, char caracter, int index = 0);
     static std::string getStringPartByNr(const std::string &data, char separator, int index);
     static std::string to_string(int i);
     static int to_int(std::string);
@@ -216,7 +215,6 @@ private:
             {
                 param_values[i] = getStringPartByNr(paramValues, GLOBALS::valuesDelimiter, i);
             }
-
         }
 
         void build(const char &param_nm, std::string *param_vals)
@@ -256,7 +254,7 @@ private:
     //Integrity data handler - basic checks in order to make sure that received data is valid
     bool checkDataIntegrity(const std::string &data);
     bool repairCorruptedData(const std::string &data);
-    BLOCK_STRUCT getParamByName(const std::string &data, const char &name, int id = -1);
+    BLOCK_STRUCT getParamsByName(BLOCK_STRUCT *blocks, const char &name, int id = -1);
 };
 
 #endif // DATASTRUCTURE_H

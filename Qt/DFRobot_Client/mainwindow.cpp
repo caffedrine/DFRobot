@@ -245,10 +245,23 @@ void MainWindow::on_testButton_clicked()
     data.setSteering(123);
     qDebug() << "Steering: " << data.getSteering().currentVal;
 
-    qDebug() << "BUILD: " << QString::fromStdString( data.buildDataString() );
+    const std::string str = data.buildDataString();
+    qDebug() << "BUILD: " << QString::fromStdString( str );
 
+    qDebug() << "PARSING: " << ((data.parseDataString( str ))?"SUCCESS":"FAILED");
 
-    std::string str = ">[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<";
-    qDebug() << "PARSING: " << ((data.parseDataString(str))?"SUCCESS":"FAILED");
+    qDebug() << "NEW VALUES:";
+
+    qDebug() << "Motors INFO:";
+    for(int i=1; i <= 4; i++)
+    {
+        qDebug() << "Motor ID: " << data.getMotorInfo(i).id << " Speed: " << data.getMotorInfo(i).speed << " Direction: " << (data.getMotorInfo(i).direction);// == DataStructure::DIRECTION::FORWARD)?"FORWARD":"BACKWARD";
+    }
+
+    data.setSpeed(255);
+    qDebug() << "Car speed: " << data.getSpeed().currentVal;
+
+    data.setSteering(123);
+    qDebug() << "Steering: " << data.getSteering().currentVal;
 
 }
