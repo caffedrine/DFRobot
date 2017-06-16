@@ -13,10 +13,10 @@ class SerialConn: public QObject
 	Q_OBJECT
 
 public:
+	typedef QSerialPort::BaudRate BaudRate;	//let user choose his own boudrate
+
 	SerialConn();
 	~SerialConn();
-
-	typedef QSerialPort::BaudRate BoudRate;	//let user choose his own boudrate
 
 private:
 	//Serial port handler
@@ -26,14 +26,14 @@ private:
 	QString lastError;
 
 public:
-	bool connect(QString portName, BoudRate boudRate);
+	bool connect(QString portName, BaudRate baudRate);
 	bool disconnect();
 
 	qint64 write(QString str);
 	qint64 read();	//not implemented yet
 	QString readString();
-
 	static QList<QString> getSerialPorts();
+	bool isOpen();
 
 	//Other methods
 	QString getLastError();

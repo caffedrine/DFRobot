@@ -5,8 +5,6 @@
 #include "serialconn.h"
 
 #include <QMainWindow>
-#include <QSerialPort>
-#include <QSerialPortInfo>
 #include <QtNetwork>
 #include <QDateTime>
 #include <QtQuick/QtQuick>
@@ -43,6 +41,7 @@ private slots:
 	qint64 serialWrite(QString str);	//better for debugging
     void serialSendDataToCar();
 	void setSerialPortStatus(bool connected);
+	bool serialAttemptReconnect();
 
 	//Motors sliders
 	void on_motor1_slider_valueChanged(int value);
@@ -65,8 +64,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QSerialPort *pSerialPort = Q_NULLPTR;
+
+	//Serial port handler
+	SerialConn::BaudRate baud = SerialConn::BaudRate::Baud19200;
 	class SerialConn *serialPort = Q_NULLPTR;
+
+	//TCP Server Handler
 	class TcpServer *server = Q_NULLPTR;
 
     //Need a global variable to store time lapsed between serial write sessions

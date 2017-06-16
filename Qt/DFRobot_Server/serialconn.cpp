@@ -2,13 +2,15 @@
 
 SerialConn::SerialConn()
 {
-
 }
 
 SerialConn::~SerialConn()
 {
 	if(!pSerialPort)
+	{
 		delete pSerialPort;
+		pSerialPort = Q_NULLPTR;
+	}
 }
 
 QString SerialConn::getLastError()
@@ -21,7 +23,7 @@ void SerialConn::setLastError(QString error)
 	this->lastError = error;
 }
 
-bool SerialConn::connect(QString portName, BoudRate boudRate)
+bool SerialConn::connect(QString portName, BaudRate baudRate)
 {
 	//Make sure we are not already connected
 	if(pSerialPort)
@@ -44,7 +46,7 @@ bool SerialConn::connect(QString portName, BoudRate boudRate)
 
 	//Setting connection params
 	pSerialPort->setPortName(portName);
-	pSerialPort->setBaudRate(boudRate);
+	pSerialPort->setBaudRate(baudRate);
 
 	try
 	{
@@ -155,4 +157,11 @@ QString SerialConn::readString()
 
 	//Send it to visual console too
 	return data;
+}
+
+bool SerialConn::isOpen()
+{
+	if(pSerialPort->isOpen() && pSerialPort->isWritable() && pSerialPort->isReadable())
+		return true;
+	return false;
 }

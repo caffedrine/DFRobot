@@ -7,7 +7,6 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    pSerialPort (0),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -25,8 +24,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 
-    if(pSerialPort)
-        delete pSerialPort;
+	if(serialPort != Q_NULLPTR)
+		delete serialPort;
 }
 
 void MainWindow::updateSpeedGauge(int val)
@@ -60,7 +59,6 @@ void MainWindow::on_pushButton_connectArduino_clicked()
 {
 	//Getting portname and baudrate
 	QString portName = ui->comboBox_serialSlots->currentText();
-	SerialConn::BoudRate baud = SerialConn::BoudRate::Baud19200;
 
 	if(serialPort != Q_NULLPTR)
 	{
@@ -74,7 +72,7 @@ void MainWindow::on_pushButton_connectArduino_clicked()
 	connect(serialPort, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setSerialPortStatus(bool)));
 	connect(serialPort, SIGNAL(readyRead()), this, SLOT(serialDataReceivingSlot()));
 
-	if(serialPort->connect(portName, baud))
+	if(serialPort->connect(portName, this->baud))
 	{
 		qDebug() << "SUCCESS: You're now connected to Arduino!";
 	}
@@ -170,7 +168,11 @@ void MainWindow::setSerialPortStatus(bool connected)
 {
 	ui->arduinoConnectionStatusLabel->setText( connected ? "CONNECTED" : "NOT CONNECTED" );
 
-	//If disconnected, attempt to reconnect
+	if(!connected)
+	{
+		delete this->serialPort;
+		this->serialPort = Q_NULLPTR;
+	}
 
 	//Check also if server is still connected. In this case all board may have been powered off
 	if(server)
@@ -454,9 +456,58 @@ void MainWindow::serialSendDataToCar()
 
 	}
 	//qDebug() << msg << "\n";
+
+
+	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
+		this->serialAttemptReconnect();
 	serialWrite(msg);
 }
 
+bool MainWindow::serialAttemptReconnect()
+{
+	if(serialPort != Q_NULLPTR)
+	{
+		delete serialPort;
+		serialPort = Q_NULLPTR;
+	}
+
+	serialPort = new SerialConn();
+
+	//Update lists in case of change
+	this->on_pushButton_updateList_clicked();	//simulate a click on button
+
+	//Select the good index
+	QString serialPrefix = "ttyACM";
+
+	//Set list on first serial port with the following prefix
+	for(int i=0; i < ui->comboBox_serialSlots->count(); i++)
+	{
+		if(ui->comboBox_serialSlots->itemText(i).contains(serialPrefix))
+			ui->comboBox_serialSlots->setCurrentIndex(i);
+	}
+
+	//Call function to reconnect
+	QString portName = ui->comboBox_serialSlots->currentText();
+
+	serialPort = new SerialConn();
+
+	//connecting serial signals
+	connect(serialPort, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setSerialPortStatus(bool)));
+	connect(serialPort, SIGNAL(readyRead()), this, SLOT(serialDataReceivingSlot()));
+
+	if(serialPort->connect(portName, this->baud))
+	{
+		qDebug() << "SUCCESS: You're now connected to Arduino!";
+		return true;
+	}
+	else
+	{
+		qDebug() << "FAILED: " << serialPort->getLastError();
+		delete serialPort;
+		serialPort = Q_NULLPTR;
+		return false;
+	}
+}
 /*
 //	 _____  ____  ____       __  ___  ____
 //	|_   _|/ ___||  _ \     / / |_ _||  _ \
