@@ -54,6 +54,9 @@ bool SerialConn::connect(QString portName, BoudRate boudRate)
 		//Check if connection succeed
 		if(pSerialPort->isOpen())
 		{
+			//Clean buffers to throw away garbage from the wires - but it is now working :(
+			pSerialPort->flush();
+			pSerialPort->clear();
 			return true;
 		}
 		else
@@ -114,3 +117,42 @@ qint64 SerialConn::write(QString str)
 	}
 }
 
+QList<QString> SerialConn::getSerialPorts()
+{
+	QList<QString> ports;
+
+	//Get serial ports info
+	QSerialPortInfo *portsInfo = new QSerialPortInfo;
+
+	//Fetching available ports into a list
+	QList<QSerialPortInfo> serialPorts = portsInfo->availablePorts();
+
+	//Filling combo list
+	foreach (QSerialPortInfo serialPort, serialPorts)
+	{
+		ports.push_back(serialPort.portName());
+	}
+
+	//clearing pointer we just created
+	delete portsInfo;
+
+	return ports;
+}
+
+QString SerialConn::readString()
+{
+	// Read data
+	static QByteArray byteArray;
+	byteArray += pSerialPort->readAll();
+
+	//we want to read all message not only chunks
+	if(!QString(byteArray).contains("\n"))
+		return "^_^";
+
+	//sanitize data
+	QString data = QString( byteArray ).remove("\r").remove("\n");
+	byteArray.clear();
+
+	//Send it to visual console too
+	return data;
+}

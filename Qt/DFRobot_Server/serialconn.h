@@ -4,6 +4,9 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QString>
+#include <QList>
+#include <QByteArray>
+#include <QDebug>
 
 class SerialConn: public QObject
 {
@@ -19,22 +22,18 @@ private:
 	//Serial port handler
 	QSerialPort *pSerialPort = Q_NULLPTR;
 
-	//Period of time after trying to recdonnect in case of connectrion lost
-	long reconnectAfterMillis = 100;
-
-	//Set this if you want to automatically attempt to reconnect
-	bool attemptReconnect = true;
-
 	//Store last error
 	QString lastError;
-
 
 public:
 	bool connect(QString portName, BoudRate boudRate);
 	bool disconnect();
 
 	qint64 write(QString str);
-	qint64 read();
+	qint64 read();	//not implemented yet
+	QString readString();
+
+	static QList<QString> getSerialPorts();
 
 	//Other methods
 	QString getLastError();

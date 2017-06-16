@@ -40,8 +40,7 @@ private slots:
 	void on_pushButton_updateList_clicked();
 
 	void serialDataReceivingSlot();
-    void serialConnectionChanged( QSerialPort::SerialPortError );
-    bool serialWrite(QString str);
+	qint64 serialWrite(QString str);	//better for debugging
     void serialSendDataToCar();
 	void setSerialPortStatus(bool connected);
 
