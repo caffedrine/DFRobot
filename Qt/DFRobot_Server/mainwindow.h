@@ -8,6 +8,7 @@
 #include <QtNetwork>
 #include <QDateTime>
 #include <QtQuick/QtQuick>
+#include <QSerialPort>
 
 namespace Ui
 {
@@ -66,8 +67,9 @@ private:
     Ui::MainWindow *ui;
 
 	//Serial port handler
-	SerialConn::BaudRate baud = SerialConn::BaudRate::Baud19200; //Not working on older Qt versions
 	class SerialConn *serialPort = Q_NULLPTR;
+    //SerialConn::BaudRate baud = SerialConn::BaudRate::Baud19200; //Not working on older Qt versions
+    SerialConn::BaudRate baud = QSerialPort::Baud19200;
 
 	//TCP Server Handler
 	class TcpServer *server = Q_NULLPTR;

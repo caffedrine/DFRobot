@@ -550,7 +550,7 @@ void MainWindow::on_startServerButton_clicked()
     server = new TcpServer(this);
     server->setPort( QString(ui->rcConnectionPortTextBox->text()).toInt() );
 
-	if(server->startServer())
+    if(server->startServer()); //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     {
         ui->rcConnectionServerStatus->setText("STARTED");
     }

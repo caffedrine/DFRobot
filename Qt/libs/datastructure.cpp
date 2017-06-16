@@ -18,8 +18,8 @@ DataStructure::DataStructure(int motors_number)
     for(int i=1; i<=this->motorsNumber; i++)
     {
         motors[i].id = i;
-        motors[i].direction = this->DIRECTION::FORWARD;
-        motors[i].lastDirection = this->DIRECTION::FORWARD;
+        motors[i].direction = this->FORWARD;
+        motors[i].lastDirection = this->FORWARD;
         motors[i].speed = 0;
         motors[i].lastSpeed = 0;
     }
