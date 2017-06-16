@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtNetwork>
+#include <QDateTime>
 #include <QtQuick/QtQuick>
 
 #include "tcpsocket.h"
@@ -62,6 +63,9 @@ private:
 
     //Data structure handler
     //DataStructure data = new DataStructure(4, 0, 250);
+
+	//Need a global variable to store time lapsed between serial write sessions
+	qint64 prevMillis = 0;
 
 };
 

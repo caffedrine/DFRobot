@@ -35,7 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     // Autofill ip address field when working on localhost
-    QString ipAddress;
+	/*
+	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 
     foreach(QHostAddress ip, ips)
@@ -124,6 +125,14 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::updateServer()
 {
+	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
+	if(currMillis - prevMillis < 80)
+	{
+		return;
+	}
+	prevMillis = currMillis;
+
+
 	if(!hSocket)
 	{
 		qDebug() << "Connect first...";
