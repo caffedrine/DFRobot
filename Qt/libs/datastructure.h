@@ -8,10 +8,17 @@
 
 #include <string>
 
-#ifdef _ARD_    //Make sure code is compatible with Arduino
+//#define __ARD__		//Use this when compile for Arduino
+//#define __WIN32__		//Use this when compile for WINDOWS
+//#define __UNIX__		//UNIX RULLZ
+
+#ifdef __ARD__    //Make sure code is compatible with Arduino
     #include <Arduino.h>            //Including arduino libs
     #define std::string String      //Make conversion between String and std::string
     #define .substr( .substring(    //Also Arduino is using substring() instead of substr()
+#else
+	#include <stdio.h>
+	#include <stdlib.h>
 #endif
 
 class DataStructure
@@ -150,6 +157,7 @@ public:
     static std::string getStringPartByNr(const std::string &data, char separator, int index);
     static std::string to_string(int i);
     static int to_int(std::string);
+	static void itoa_custom(int n, char s[]);
 
 private:
     //Final builded message will be an array of blocks - let's define structure of a block

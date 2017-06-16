@@ -253,8 +253,36 @@ std::string DataStructure::getStringPartByNr(const std::string &data, char separ
 std::string DataStructure::to_string(int val)
 {
     char snum[16];
-    itoa(val, snum, 10);
+#ifdef __ARD__ || __WIN32__
+	itoa(val, snum, 10);	//it is onbly supported by windows and arduino - no Linux :(
+#else
+	itoa_custom(val, snum);
+#endif
     return snum;
+}
+
+void DataStructure::itoa_custom(int n, char s[])
+{
+	int i, sign;
+
+	if ((sign = n) < 0)  /* record sign */
+		n = -n;          /* make n positive */
+	i = 0;
+	do {       /* generate digits in reverse order */
+		s[i++] = n % 10 + '0';   /* get next digit */
+	} while ((n /= 10) > 0);     /* delete it */
+	if (sign < 0)
+		s[i++] = '-';
+	s[i] = '\0';
+
+	//reversing
+	char c;
+	for (int i = 0, j = strlen(s)-1; i<j; i++, j--)
+	{
+		c = s[i];
+		s[i] = s[j];
+		s[j] = c;
+	}
 }
 
 int DataStructure::to_int(std::string str)
