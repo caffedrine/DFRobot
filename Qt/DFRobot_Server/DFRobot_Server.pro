@@ -26,13 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES +=  main.cpp\
             mainwindow.cpp \
             tcpserver.cpp \
-            serialconn.cpp \
-            ../libs/datastructure.cpp
+            ../libs/datastructure.cpp \
+            serialconn.cpp
 
 HEADERS  += mainwindow.h \
             tcpserver.h \
-            serialconn.h \
-            ../libs/datastructure.h
+            ../libs/datastructure.h \
+            serialconn.h
 
 FORMS    += mainwindow.ui
 

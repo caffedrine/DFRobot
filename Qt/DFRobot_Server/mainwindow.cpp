@@ -52,7 +52,7 @@ void MainWindow::updateSpeedGauge(int val)
 void MainWindow::on_pushButton_connectArduino_clicked()
 {
     //QMessageBox::information(this, tr("Important message"), tr("This is all I want to say!"));
-
+	/*
     if(pSerialPort)
         delete pSerialPort;
 
@@ -86,6 +86,34 @@ void MainWindow::on_pushButton_connectArduino_clicked()
     {
         qDebug() << "SUCCESS: CONNECTED";
     }
+	*/
+
+	//Getting portname and baudrate
+	QString portName = ui->comboBox_serialSlots->currentText();
+	SerialConn::BoudRate baud = SerialConn::BoudRate::Baud19200;
+
+	if(serialPort)
+	{
+		delete serialPort;
+		serialPort = Q_NULLPTR;
+	}
+
+	serialPort = new SerialConn();
+
+	//connecting serial signals
+	connect(serialPort, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setSerialPortStatus(bool)));
+	//connect(serialPort, SIGNAL(readyRead()), this, SLOT(serialDataReceivingSlot()));
+
+	if(serialPort->connect(portName, baud))
+	{
+		qDebug() << "SUCCESS: You're now connected to Arduino!";
+	}
+	else
+	{
+		qDebug() << "FAILED: " << serialPort->getLastError();
+		delete serialPort;
+		serialPort = Q_NULLPTR;
+	}
 }
 
 void MainWindow::serialDataReceivingSlot()
@@ -118,6 +146,25 @@ bool MainWindow::serialWrite(QString str)
     }
     prevMillis = currMillis;
 
+	if(serialPort == Q_NULLPTR)
+	{
+		qDebug() << "FAILED: Please connect to Arduino board first!";
+		return false;
+	}
+
+	qint64 bytesWritten = serialPort->write(str);
+	if( bytesWritten > 0)
+	{
+		QString dbgStr = "SUCCESS: SEND (" + QString::number(bytesWritten) + "bytes): " + str;
+
+		qDebug() << dbgStr;
+	}
+	else
+	{
+		qDebug() << "FAILED: " << serialPort->getLastError();
+	}
+
+	/*
     if(pSerialPort == Q_NULLPTR)
     {
         qDebug() << "FAILED: Please connect to Arduino board first!";
@@ -136,6 +183,7 @@ bool MainWindow::serialWrite(QString str)
         qDebug() << "FAILED: Cannot write on serial port...";
         return false;
     }
+	*/
 }
 
 void MainWindow::on_pushButton_updateList_clicked()
@@ -200,11 +248,12 @@ void MainWindow::on_motor4_slider_valueChanged(int value)
 
 void MainWindow::on_pushButton_disconnectArduino_clicked()
 {
+	/*
     if(this->pSerialPort != Q_NULLPTR)
     {
         if(pSerialPort->isOpen())
             this->pSerialPort->close();
-        //delete pSerialPort;
+		delete pSerialPort;
     }
     else
     {
@@ -214,11 +263,30 @@ void MainWindow::on_pushButton_disconnectArduino_clicked()
 
     this->setSerialPortStatus(0);
     qDebug() << "SUCCESS: DISCONNECTED";
+	*/
+
+	if(!serialPort)
+	{
+		qDebug() << "FAILED: You're not connected to Arduino!";
+		return;
+	}
+
+	if(this->serialPort->disconnect())
+	{
+		qDebug() << "SUCCESS: DISCONNECTED!";
+		this->setSerialPortStatus(0);
+	}
+	else
+	{
+		qDebug() << "FAILED: " << serialPort->getLastError();
+	}
 }
 
 void MainWindow::setSerialPortStatus(bool connected)
 {
     ui->arduinoConnectionStatusLabel->setText( connected ? "CONNECTED" : "NOT CONNECTED" );
+
+	//Check also if server is still connected. In this case all board may have been powered off
 	if(server)
 	{
 		if(!connected)
@@ -230,7 +298,8 @@ void MainWindow::setSerialPortStatus(bool connected)
 
 void MainWindow::serialConnectionChanged(QSerialPort::SerialPortError errNo)
 {
-    (errNo == 0) ? this->setSerialPortStatus(1) : this->setSerialPortStatus(0);
+
+	(errNo == 0) ? this->setSerialPortStatus(1) : this->setSerialPortStatus(0);
 }
 
 void MainWindow::on_startServerButton_clicked()

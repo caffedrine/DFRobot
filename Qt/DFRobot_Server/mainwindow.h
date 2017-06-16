@@ -67,7 +67,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSerialPort *pSerialPort = Q_NULLPTR;
-	class SerialConn *serial = Q_NULLPTR;
+	class SerialConn *serialPort = Q_NULLPTR;
 	class TcpServer *server = Q_NULLPTR;
 
     //Need a global variable to store time lapsed between serial write sessions
