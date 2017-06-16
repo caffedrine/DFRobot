@@ -58,6 +58,8 @@ void setup()
 	utils::brake();
 }
 
+long lastTimeHeardFromHost = 0;
+
 void loop()
 {
 	//Read and parse serial message if available`
@@ -68,10 +70,23 @@ void loop()
 
 	//Update motors speeds and the stuff
 	utils::updateMotors();
+
+	//Brake if not hear from remote controller
+	//brakeIfNotHeardWithin(int interval);
 }
+
+
 
 namespace utils
 {
+	void brakeIfNotHeardWithin(int interval)
+	{
+		if (millis() - lastTimeHeardFromHost > interval)
+		{
+			utils::brake();
+		}
+	}
+
 	void updateMotors()
 	{
 		//////////////////////////////////////////////////////////////////////////
@@ -166,6 +181,8 @@ namespace utils
 				motor4_speed = to_int(spd);
 			}
 		}
+
+		lastTimeHeardFromHost = millis();
 	}
 
 	void checkSerial()
