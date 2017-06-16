@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	//Load CircularGauge
     viewGauge = new QQuickView();
     containerGauge = QWidget::createWindowContainer(viewGauge, this);
     containerGauge->setMinimumSize(160, 160);
@@ -18,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
     containerGauge->setFocusPolicy(Qt::TabFocus);
     viewGauge->setSource(QUrl("../CircularGauge.qml"));
     ui->verticalLayout->addWidget(containerGauge);
+
+	//Startup functions - Auto start TCP/IP server and connect au Arduino on startup
+	this->serialAttemptReconnect();
+	on_startServerButton_clicked();
 }
 
 MainWindow::~MainWindow()
