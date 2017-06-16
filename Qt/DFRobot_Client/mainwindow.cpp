@@ -237,10 +237,10 @@ void MainWindow::on_testButton_clicked()
     DataStructure data(4);
     //DataStructure *data = new DataStructure(4); //It may be problematic on Arduino
 
-    data.setMotorInfo(1, 100, DataStructure::DIRECTION::FORWARD);
-    data.setMotorInfo(2, 200, DataStructure::DIRECTION::FORWARD);
-    data.setMotorInfo(3, 300, DataStructure::DIRECTION::BACKWARD);
-    data.setMotorInfo(4, 400, DataStructure::DIRECTION::BACKWARD);
+    data.setMotorInfo(1, 100, DataStructure::FORWARD);
+    data.setMotorInfo(2, 200, DataStructure::FORWARD);
+    data.setMotorInfo(3, 300, DataStructure::BACKWARD);
+    data.setMotorInfo(4, 400, DataStructure::BACKWARD);
 
     qDebug() << "Motors INFO:";
     for(int i=1; i <= 4; i++)
