@@ -126,7 +126,7 @@ void MainWindow::on_connectButton_clicked()
 void MainWindow::updateServer()
 {
 	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
-	if(currMillis - prevMillis < 80)
+	if(currMillis - prevMillis < 30)
 	{
 		return;
 	}
