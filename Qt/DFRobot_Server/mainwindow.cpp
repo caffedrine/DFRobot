@@ -21,8 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->verticalLayout->addWidget(containerGauge);
 
 	//Startup functions - Auto start TCP/IP server and connect au Arduino on startup
-	this->serialAttemptReconnect();
-	on_startServerButton_clicked();
+//    this->serialAttemptReconnect();
+    on_startServerButton_clicked();
+
+
+    //Init data structure
+    dataStructure = new DataStructure(4);
 }
 
 MainWindow::~MainWindow()
@@ -463,9 +467,23 @@ void MainWindow::serialSendDataToCar()
 	//qDebug() << msg << "\n";
 
 
-	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
-		this->serialAttemptReconnect();
-	serialWrite(msg);
+//	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
+//    {
+//        //It will crash anyway if prefix/device is wrong :(
+//        try
+//        {
+//            if(this->serialAttemptReconnect())
+//                serialWrite(msg);
+//        }
+//        catch(...)
+//        {
+//            qDebug() << "FAIL: Fatal error on Serial port reconnect!";
+//        }
+//    }
+//    else
+//    {
+//        serialWrite(msg);
+//    }
 }
 
 bool MainWindow::serialAttemptReconnect()
@@ -550,7 +568,7 @@ void MainWindow::on_startServerButton_clicked()
     server = new TcpServer(this);
     server->setPort( QString(ui->rcConnectionPortTextBox->text()).toInt() );
 
-    if(server->startServer()); //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if(server->startServer())
     {
         ui->rcConnectionServerStatus->setText("STARTED");
     }
@@ -560,9 +578,26 @@ void MainWindow::processRecvData(QString data)
 {
     ui->rcConnectionConsoleTextBox->appendPlainText(data);
 
-    if( !data.contains("[") || !data.contains("]") || !data.contains("|") )
-        return;
+    dataStructure->parseDataString( data.toStdString() );
 
+    //Update sliders
+    ui->speedSlider->setValue( dataStructure->getSpeed().currentVal );
+    ui->leftRightSlider->setValue( dataStructure->getSteering().currentVal );
+
+    //Updating motors sliders
+    ui->motor1_slider->setValue( dataStructure->getMotorInfo(1).speed );
+    ui->motor2_slider->setValue( dataStructure->getMotorInfo(2).speed );
+    ui->motor3_slider->setValue( dataStructure->getMotorInfo(3).speed );
+    ui->motor4_slider->setValue( dataStructure->getMotorInfo(4).speed );
+
+    //Update buttons
+    ui->pushButton_reverse1->setChecked( ((bool)(dataStructure->getMotorInfo(1).direction))?false:true );
+    ui->pushButton_reverse2->setChecked( ((bool)(dataStructure->getMotorInfo(2).direction))?false:true );
+    ui->pushButton_reverse3->setChecked( ((bool)(dataStructure->getMotorInfo(3).direction))?false:true );
+    ui->pushButton_reverse4->setChecked( ((bool)(dataStructure->getMotorInfo(4).direction))?false:true );
+
+
+    /*
     QStringList motors = data.split(",");
 	for(int i=0; i<=5; i++)
     {
@@ -614,6 +649,7 @@ void MainWindow::processRecvData(QString data)
 			}
         }
     }
+    */
 }
 
 void MainWindow::on_stopServerButton_clicked()

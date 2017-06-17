@@ -357,6 +357,22 @@
       <string>NOT CONNECTED</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="forwardModeCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>FORWARD MODE</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="motorsControlGroupBox">
     <property name="geometry">
@@ -667,10 +683,10 @@
       </rect>
      </property>
      <property name="minimum">
-      <number>-100</number>
+      <number>-255</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>255</number>
      </property>
      <property name="singleStep">
       <number>5</number>

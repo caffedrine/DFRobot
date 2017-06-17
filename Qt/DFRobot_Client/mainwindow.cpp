@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
-	/*
+
 	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 
@@ -146,23 +146,21 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::updateServer()
 {
-
-
     /*
     //Make sure we don't send to much data
 	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
-    if(currMillis - prevMillis < 20)
+    if(currMillis - prevMillis < 10)
 	{
 		return;
 	}
 	prevMillis = currMillis;
     //*/
 
-//	if(!hSocket)
-//	{
-//        qDebug() << "TCP SEND: FAILED -> Connect to host first...";
-//		return;
-//  }
+    if(!hSocket)
+    {
+        qDebug() << "TCP SEND: FAILED -> Connect to host first...";
+        return;
+    }
 
     //For now, we only send motors parameters
     DataStructure::Motor motors[5]; //Motor IDs should start from 1. This is why we have 5 elements;
@@ -190,9 +188,6 @@ void MainWindow::updateServer()
     /////////////////////////////////////////////////////////
 
 
-
-
-
     /////////////////////////////////////////////////////////
     //Fill values into dataStructure
     for(int i=1; i<=4; i++)
@@ -202,27 +197,30 @@ void MainWindow::updateServer()
     dataStructure->setSpeed(carSpeed);
     dataStructure->setSteering(carSteering);
 
-    for(int i=1; i <= 4; i++ )
-        qDebug() << "Motor" << i << ": "
-                 << dataStructure->getMotorInfo(i).id << " - "
-                 << (int)dataStructure->getMotorInfo(i).direction << " - "
-                 <<  dataStructure->getMotorInfo(i).speed;
+//    for(int i=1; i <= 4; i++ )
+//        qDebug() << "Motor" << i << ": "
+//                 << dataStructure->getMotorInfo(i).id << " - "
+//                 << (int)dataStructure->getMotorInfo(i).direction << " - "
+//                 <<  dataStructure->getMotorInfo(i).speed;
 
-    qDebug() << "Speed: " << dataStructure->getSpeed().currentVal << "\tLast speed: " << dataStructure->getSpeed().lastVal;
-    qDebug() << "Steer: " << dataStructure->getSteering().currentVal << "\tLast steer: " << dataStructure->getSteering().lastVal;
+//    qDebug() << "Speed: " << dataStructure->getSpeed().currentVal << "\tLast speed: " << dataStructure->getSpeed().lastVal;
+//    qDebug() << "Steer: " << dataStructure->getSteering().currentVal << "\tLast steer: " << dataStructure->getSteering().lastVal;
 
     const std::string str = dataStructure->buildDataString(true);
     QString buildedDataString = QString::fromStdString( str );
 
+    if(this->hSocket->isAvailable())
+    {
+        this->hSocket->write(buildedDataString);
 
-    qDebug() << "BUILD: " << buildedDataString << "\n";
-
-//	if(this->hSocket->isAvailable())
-//    {
-//		this->hSocket->write(data);
-//    }
-//	else
-//		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+        QString dbgStr = "TCP SEND: (" + QString::number(buildedDataString.size()) + "bytes): ";
+        dbgStr += buildedDataString;
+        qDebug() << dbgStr;
+    }
+    else
+    {
+        qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+    }
 }
 
 void MainWindow::on_speedSlider_valueChanged(int value)
@@ -284,7 +282,7 @@ void MainWindow::on_disconnectButton_clicked()
 void MainWindow::on_testButton_clicked()
 {
 
-    /*
+
     DataStructure data;
     //DataStructure *data = new DataStructure(4); //It may be problematic on Arduino
 

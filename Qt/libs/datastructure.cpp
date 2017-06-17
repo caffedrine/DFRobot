@@ -123,11 +123,32 @@ std::string DataStructure::buildDataString(bool optimized)
     return buildedString;
 }
 
-bool DataStructure::parseDataString(const std::string &data)
+bool DataStructure::parseDataString(const std::string &dataR)
 {
+    std::string data = dataR;
+
     //this function receive data and have to parse it
-    if( this->checkDataIntegrity(data) == false )
+    if( this->checkDataIntegrity(dataR) == false )
         return false;
+
+    //Slow network tend to concat multiple messages. Check for this and merge into one message
+    if(1)//getNumberOfChars(dataR, GLOBALS::startToken) > 1)
+    {
+        //This mean we have to messages concated: ..><..
+        // :( char to string
+        std::string messagesCommonPoint(1, GLOBALS::endToken);
+        std::string messagesCommonPoint2(1, GLOBALS::startToken);
+        messagesCommonPoint += messagesCommonPoint2;
+
+        std::string blocksDelimiterString(1, GLOBALS::blocksDelimiter);
+
+        qDebug() << "REPL: " << QString::fromStdString(messagesCommonPoint);
+
+        replaceAll(data, messagesCommonPoint, blocksDelimiterString);
+    }
+
+    qDebug() << "STRRRR: " << QString::fromStdString(data);
+    return false;
 
     //EXAMPLE: >[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<
     //Regex like a boss? Naa, not on arduino :(
@@ -137,32 +158,39 @@ bool DataStructure::parseDataString(const std::string &data)
 
     //Getting number of blocks
     int blocks_number = getNumberOfChars(data, GLOBALS::blocksDelimiter) + 1;
+    if(blocks_number > GLOBALS::MAX_BLOCKS_NUMBER) blocks_number = GLOBALS::MAX_BLOCKS_NUMBER;
 
-    //process every block
-    for(int i=0; i < blocks_number; i++)
+    //process every block - Start with last block - process last arrived blocks and drop first arrived as are overwritten by lasts
+    //It is usefull on slow networks
+    for(int i=blocks_number-1; i >= 0; i--)
     {
         std::string currentBlock = this->getStringPartByNr(data, GLOBALS::blocksDelimiter, i);
 
         //remove first and last token
         if(i == 0) currentBlock = currentBlock.substr(1);
-        if(i == (blocks_number - 1)) currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
+        if(i == (blocks_number-1)) currentBlock = currentBlock.substr(0, currentBlock.length() - 1);
 
         blocks[i].parse(currentBlock);
     }
 
     //We got an array of blocks. Now we may want to fill our variables
 
-    //Fill up the speed
-    this->setSpeed( to_int( getParamsByName(blocks, (const char)GLOBALS::speedIdentifier).param_values[0] ) );
+    //Fill up the speed if we received a speed
+    BLOCK_STRUCT speedBlock = getParamsByName(blocks, (const char)GLOBALS::speedIdentifier);
+    if(!speedBlock.isEmpty())
+        this->setSpeed( to_int( speedBlock.param_values[0] ) );
 
     //Fill up steering
-    this->setSteering( to_int( getParamsByName(blocks, (const char)GLOBALS::steeringIdentifier).param_values[0] ) );
+    BLOCK_STRUCT steeringBlock = getParamsByName(blocks, (const char)GLOBALS::steeringIdentifier);
+    if(!steeringBlock.isEmpty())
+        this->setSteering( to_int( steeringBlock.param_values[0] ) );
 
     //Filling up motors values
     for(int i=1; i <= motorsNumber; i++)
     {
         BLOCK_STRUCT motorBlock = getParamsByName(blocks, (const char)GLOBALS::motorIdentifier, i);
-        setMotorInfo(i, to_int(motorBlock.param_values[2]), (DIRECTION)to_int(motorBlock.param_values[1]));
+        if(!motorBlock.isEmpty())
+            setMotorInfo(i, to_int(motorBlock.param_values[2]), (DIRECTION)to_int(motorBlock.param_values[1])); //A kind of internal API like a boss o_O
     }
 
     return true;
@@ -171,6 +199,8 @@ bool DataStructure::parseDataString(const std::string &data)
 bool DataStructure::checkDataIntegrity(const std::string &data)
 {
     //function to perform basic data integrity check in order to make sure we didn't receive garbage
+    if(data.length() < 6)
+        return false;
 
     //Make sure we have first and last token
     if(this->getNumberOfChars(data, GLOBALS::startToken) < 1 ||  this->getNumberOfChars(data, GLOBALS::endToken) < 1)
@@ -189,6 +219,9 @@ bool DataStructure::checkDataIntegrity(const std::string &data)
         return false;
 
     if(this->getNumberOfChars(data, GLOBALS::valuesLeftToken)-1 != this->getNumberOfChars(data, GLOBALS::blocksDelimiter) )
+        return false;
+
+    if(this->getNumberOfChars(data, GLOBALS::blockLeftToken)-1 != this->getNumberOfChars(data, GLOBALS::blocksDelimiter) )
         return false;
 
     //Matemathical poly functions can be used here if you wanna be a GURU :))
@@ -314,6 +347,43 @@ void DataStructure::itoa_custom(int n, char s[])
 int DataStructure::to_int(std::string str)
 {
     return atoi(str.c_str());
+}
+
+int DataStructure::indexOfNth(const std::string &str, const std::string &findMe, int nth)
+{
+    size_t  pos = 0;
+    int     cnt = 0;
+
+    while( cnt != nth )
+    {
+        pos+=1;
+        pos = str.find(findMe, pos);
+        if ( pos == std::string::npos )
+            return -1;
+        cnt++;
+    }
+    return pos;
+}
+
+void DataStructure::replaceAll(std::string &source, const std::string &from, const std::string &to)
+{
+    std::string newString;
+    newString.reserve(source.length());  // avoids a few memory allocations
+
+    std::string::size_type lastPos = 0;
+    std::string::size_type findPos;
+
+    while(std::string::npos != (findPos = source.find(from, lastPos)))
+    {
+        newString.append(source, lastPos, findPos - lastPos);
+        newString += to;
+        lastPos = findPos + from.length();
+    }
+
+    // Care for the rest after last occurrence
+    newString += source.substr(lastPos);
+
+    source.swap(newString);
 }
 
 /*

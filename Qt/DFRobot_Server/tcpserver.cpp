@@ -15,12 +15,12 @@ bool TcpServer::startServer()
     if(!server->listen(QHostAddress::Any, this->port))
     {
         qDebug() << "FAILED: Server could not start!";
-        return true;
+        return false;
     }
     else
     {
         qDebug() << "SUCCESS: Server started!";
-        return false;
+        return true;
     }
 }
 

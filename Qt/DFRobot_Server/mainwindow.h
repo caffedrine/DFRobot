@@ -3,6 +3,7 @@
 
 #include "tcpserver.h"
 #include "serialconn.h"
+#include "../libs/datastructure.h"
 
 #include <QMainWindow>
 #include <QtNetwork>
@@ -68,11 +69,13 @@ private:
 
 	//Serial port handler
 	class SerialConn *serialPort = Q_NULLPTR;
-    //SerialConn::BaudRate baud = SerialConn::BaudRate::Baud19200; //Not working on older Qt versions
     SerialConn::BaudRate baud = QSerialPort::Baud19200;
 
 	//TCP Server Handler
 	class TcpServer *server = Q_NULLPTR;
+
+    //Data structure
+    DataStructure *dataStructure = Q_NULLPTR;
 
     //Need a global variable to store time lapsed between serial write sessions
     qint64 prevMillis = 0;

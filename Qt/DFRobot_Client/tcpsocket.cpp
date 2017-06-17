@@ -25,7 +25,7 @@ void TcpSocket::doConnect()
     connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
 
-    qDebug() << "connecting...";
+    qDebug() << "Connecting...";
 
     // this is not blocking call
     socket->connectToHost(this->hostname, this->port);
@@ -54,7 +54,7 @@ void TcpSocket::disconnected()
 
 void TcpSocket::bytesWritten(qint64 bytes)
 {
-    qDebug() << bytes << " bytes written...";
+    //qDebug() << bytes << " bytes written...";
 }
 
 void TcpSocket::readyRead()

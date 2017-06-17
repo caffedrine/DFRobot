@@ -57,7 +57,7 @@ public:
         static const char steeringIdentifier    = 'd';  //Direction/Steering identifier token
 
         //Other values
-        static const int MAX_MOTORS = 8;                //maximum numbers of motors
+        static const int MAX_MOTORS = 6;                //maximum numbers of motors
         static const int MAX_PARAMS_NUMBER = 3;         //Maximum number of values assigned to a param
         static const int MAX_BLOCKS_NUMBER = 8;         //Maximum number of blocks
     };
@@ -158,6 +158,8 @@ public:
     static std::string to_string(int i);
     static int to_int(std::string);
 	static void itoa_custom(int n, char s[]);
+    static int indexOfNth(const std::string& str, const std::string& findMe, int nth);
+    static void replaceAll(std::string &source, const std::string &from, const std::string &to);
 
 private:
     //Final builded message will be an array of blocks - let's define structure of a block
