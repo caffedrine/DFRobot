@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QString>
 
-
 DataStructure::DataStructure(int motors_number)
 {
     //Setting up and validating number of motors
@@ -26,15 +25,18 @@ DataStructure::DataStructure(int motors_number)
 
     //Initializing speed for the first time
     this->speed.lastVal = 0;
-    this->speed.lastVal = 0;
+    this->speed.currentVal = 0;
 
     //Initializing direction for the first time
     this->steering.lastVal = 0;
     this->steering.currentVal = 0;
 }
 
-std::string DataStructure::buildDataString()
+std::string DataStructure::buildDataString(bool optimized)
 {
+     //bool optimized;      // If this is enabled, params whose values are thee same as last time
+                            // won't be added to builded string. This mean that network traffic is decreassed
+
     //We have to return a string
     std::string buildedString = "";
 
@@ -47,7 +49,14 @@ std::string DataStructure::buildDataString()
     for(int i=1; i<=this->motorsNumber; i++)
     {
         //Update only motors with values changed since last time
-        if(this->motors[i].speed != this->motors[i].lastSpeed || this->motors[i].direction != this->motors[i].lastDirection)
+        if(!optimized)  //If not optimized, we just add all values
+        {
+            std::string *values = motors[i].to_array();
+            blocks[i-1].build( (const char)GLOBALS::motorIdentifier, values);
+            delete[] values;
+        }
+        //This mean we want to optimize vals not adding unchanged params
+        else if(this->motors[i].speed != this->motors[i].lastSpeed || this->motors[i].direction != this->motors[i].lastDirection)
         {
             std::string *values = motors[i].to_array();
             blocks[i-1].build( (const char)GLOBALS::motorIdentifier, values);
@@ -56,7 +65,14 @@ std::string DataStructure::buildDataString()
     }
 
     //Speed
-    if(speed.currentVal != speed.lastVal)
+    if(!optimized)
+    {
+        //Use this to prevent memory leak - we can delete this obj
+        std::string *values = speed.to_array();
+        blocks[4].build( (const char)GLOBALS::speedIdentifier, values );
+        delete[] values;
+    }
+    else if(this->speed.currentVal != this->speed.lastVal)
     {
         //Use this to prevent memory leak - we can delete this obj
         std::string *values = speed.to_array();
@@ -65,20 +81,27 @@ std::string DataStructure::buildDataString()
     }
 
     //Steering
-    if(steering.currentVal != steering.lastVal)
+    if(!optimized)
     {
         std::string *values = steering.to_array();
         blocks[5].build( (const char)GLOBALS::steeringIdentifier, steering.to_array() );
-        delete[] values; //Don;t judge me! Adruino does not support smart pointers!!!
+        delete[] values; //Don't judge me! Adruino does not support smart pointers!!!
     }
-
+    else if(this->steering.currentVal != this->steering.lastVal)
+    {
+        std::string *values = steering.to_array();
+        blocks[5].build( (const char)GLOBALS::steeringIdentifier, steering.to_array() );
+        delete[] values; //Don't judge me! Adruino does not support smart pointers!!!
+    }
     //Add custom values following the above pattern
+    //////////// Custom values ////////////////////
+    //// blocks[6].build() or blocks[6].parse()////
 
-    //Add your custom data here
-    // blocks[6].build() or blocks[6].parse()
-    //At the end, we get something like this
-    // ">[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<"
+    ///////////////////////////////////////////////
 
+
+    /// At the end, we should have something like this
+    /// ">[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<"
 
     //Procees with bulding the string we want to send
     buildedString += GLOBALS::startToken;
@@ -91,7 +114,10 @@ std::string DataStructure::buildDataString()
                 buildedString += GLOBALS::blocksDelimiter;
         }
         else
-            break;
+        {
+            //break;
+            continue;
+        }
     }
     buildedString += GLOBALS::endToken;
     return buildedString;
@@ -253,7 +279,7 @@ std::string DataStructure::getStringPartByNr(const std::string &data, char separ
 std::string DataStructure::to_string(int val)
 {
     char snum[16];
-#ifdef __ARD__ || __WIN32__
+#if defined(__ARD__) || defined(__WIN32__)
 	itoa(val, snum, 10);	//it is onbly supported by windows and arduino - no Linux :(
 #else
 	itoa_custom(val, snum);

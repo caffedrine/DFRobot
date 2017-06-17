@@ -19,10 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	//lOAD JOYSTICK
 	QQuickView *view = new QQuickView();
 	view->setSource(QUrl("../virtual_joystick.qml"));
-#ifndef _WIN32
 	view->setClearBeforeRendering(true);
 	view->setColor(QColor(Qt::transparent));
-#endif
 	QQuickItem *root = view->rootObject();
 	connect(root, SIGNAL(joystick_moved(double, double)), this, SLOT(joystick_moved(double, double)) );
 
@@ -33,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	container->setFocusPolicy(Qt::TabFocus);
 	ui->joystickLayout->addWidget(container);
 
+    //Init datastructure
+    if(dataStructure != Q_NULLPTR)
+    {
+        delete dataStructure;
+        dataStructure = Q_NULLPTR;
+    }
+    dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
 	/*
@@ -58,6 +63,19 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    if(hSocket != Q_NULLPTR)
+        delete hSocket;
+
+    if(viewGauge != Q_NULLPTR)
+        delete viewGauge;
+
+    if(containerGauge != Q_NULLPTR)
+        delete containerGauge;
+
+    if(dataStructure != Q_NULLPTR)
+        delete dataStructure;
+
 }
 
 void MainWindow::updateSpeedGauge(int val)
@@ -112,8 +130,11 @@ void MainWindow::on_m4slider_valueChanged(int value)
 
 void MainWindow::on_connectButton_clicked()
 {
-	if(hSocket)
+    if(hSocket != Q_NULLPTR)
+    {
 		delete hSocket;
+        hSocket = Q_NULLPTR;
+    }
 
 	hSocket = new TcpSocket(this);
 
@@ -125,55 +146,83 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::updateServer()
 {
+
+
+    /*
+    //Make sure we don't send to much data
 	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
-	if(currMillis - prevMillis < 30)
+    if(currMillis - prevMillis < 20)
 	{
 		return;
 	}
 	prevMillis = currMillis;
+    //*/
 
-
-	if(!hSocket)
-	{
-		qDebug() << "Connect first...";
-		return;
-	}
-
-    //Build the string we want to send via network
-    //I will use JSON
+//	if(!hSocket)
+//	{
+//        qDebug() << "TCP SEND: FAILED -> Connect to host first...";
+//		return;
+//  }
 
     //For now, we only send motors parameters
-    QString m1s, m1d, m2s, m2d, m3s, m3d, m4s, m4d; //Motors, directions and speeds
+    DataStructure::Motor motors[5]; //Motor IDs should start from 1. This is why we have 5 elements;
+    int carSteering, carSpeed;
 
-	QString carDir, carSpeed;
+    //Setting up motors IDs
+    for(int i=1; i<=4; i++)
+        motors[i].id = i;
 
-    m1s = ui->m1speedLabel->text();
-    m2s = ui->m2speedLabel->text();
-    m3s = ui->m3speedLabel->text();
-    m4s = ui->m4speedLabel->text();
+    //Get values from GUI
+    motors[1].speed = ui->m1speedLabel->text().toInt();
+    motors[2].speed = ui->m2speedLabel->text().toInt();
+    motors[3].speed = ui->m3speedLabel->text().toInt();
+    motors[4].speed = ui->m4speedLabel->text().toInt();
 
-    m1d = ui->m1DirButton->isChecked() ? "1" : "0";
-    m2d = ui->m2DirButton->isChecked() ? "1" : "0";
-    m3d = ui->m3DirButton->isChecked() ? "1" : "0";
-    m4d = ui->m4DirButton->isChecked() ? "1" : "0";
+    motors[1].direction = ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+    motors[2].direction = ui->m2DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+    motors[3].direction = ui->m3DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+    motors[4].direction = ui->m4DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
 
-    carDir      = ui->directionLabel->text();
-    carSpeed    = ui->speedLabel->text();
+    carSteering = ui->directionLabel->text().toInt();
+    carSpeed    = ui->speedLabel->text().toInt();
 
-    QString data;
-    data += "[" + m1s + "|" + m1d + "],";
-    data += "[" + m2s + "|" + m2d + "],";
-    data += "[" + m3s + "|" + m3d + "],";
-	data += "[" + m4s + "|" + m4d + "],";
-	data += "[s|" + carSpeed + "],";
-	data += "[d|" + carDir + "]";
+    //Process data here in order to get clean movement of car
+    /////////////////////////////////////////////////////////
 
-    qDebug() << data;
 
-	if(this->hSocket->isAvailable())
-		this->hSocket->write(data);
-	else
-		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+
+
+
+    /////////////////////////////////////////////////////////
+    //Fill values into dataStructure
+    for(int i=1; i<=4; i++)
+        dataStructure->setMotorInfo(i, motors[i].speed, motors[i].direction);
+
+    //Setting speed and steering
+    dataStructure->setSpeed(carSpeed);
+    dataStructure->setSteering(carSteering);
+
+    for(int i=1; i <= 4; i++ )
+        qDebug() << "Motor" << i << ": "
+                 << dataStructure->getMotorInfo(i).id << " - "
+                 << (int)dataStructure->getMotorInfo(i).direction << " - "
+                 <<  dataStructure->getMotorInfo(i).speed;
+
+    qDebug() << "Speed: " << dataStructure->getSpeed().currentVal << "\tLast speed: " << dataStructure->getSpeed().lastVal;
+    qDebug() << "Steer: " << dataStructure->getSteering().currentVal << "\tLast steer: " << dataStructure->getSteering().lastVal;
+
+    const std::string str = dataStructure->buildDataString(true);
+    QString buildedDataString = QString::fromStdString( str );
+
+
+    qDebug() << "BUILD: " << buildedDataString << "\n";
+
+//	if(this->hSocket->isAvailable())
+//    {
+//		this->hSocket->write(data);
+//    }
+//	else
+//		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
 }
 
 void MainWindow::on_speedSlider_valueChanged(int value)
@@ -234,7 +283,9 @@ void MainWindow::on_disconnectButton_clicked()
 
 void MainWindow::on_testButton_clicked()
 {
-    DataStructure data(4);
+
+    /*
+    DataStructure data;
     //DataStructure *data = new DataStructure(4); //It may be problematic on Arduino
 
     data.setMotorInfo(1, 100, DataStructure::FORWARD);
@@ -275,4 +326,20 @@ void MainWindow::on_testButton_clicked()
     data.setSteering(123);
     qDebug() << "Steering: " << data.getSteering().currentVal;
 
+    /* //*/
+
+
+//    DataStructure *data = new DataStructure(4); //It may be problematic on Arduino
+
+//    data->setMotorInfo(1, 100, DataStructure::FORWARD);
+//    data->setMotorInfo(2, 200, DataStructure::FORWARD);
+//    data->setMotorInfo(3, 300, DataStructure::BACKWARD);
+//    data->setMotorInfo(4, 400, DataStructure::BACKWARD);
+
+//    data->setSpeed(123);
+//    data->setSteering(456);
+
+//    const std::string str = data->buildDataString();
+//    qDebug() << "BUILD: " << QString::fromStdString( str );
+    //*/
 }

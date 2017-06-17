@@ -12,7 +12,7 @@
 //#define __WIN32__		//Use this when compile for WINDOWS
 //#define __UNIX__		//UNIX RULLZ
 
-#ifdef __ARD__    //Make sure code is compatible with Arduino
+#if defined(__ARD__)    //Make sure code is compatible with Arduino
     #include <Arduino.h>            //Including arduino libs
     #define std::string String      //Make conversion between String and std::string
     #define .substr( .substring(    //Also Arduino is using substring() instead of substr()
@@ -58,8 +58,8 @@ public:
 
         //Other values
         static const int MAX_MOTORS = 8;                //maximum numbers of motors
-        static const int MAX_PARAMS_NUMBER = 3;          //Maximum number of values assigned to a param
-        static const int MAX_BLOCKS_NUMBER = 8;        //Maximum number of blocks
+        static const int MAX_PARAMS_NUMBER = 3;         //Maximum number of values assigned to a param
+        static const int MAX_BLOCKS_NUMBER = 8;         //Maximum number of blocks
     };
 
     //We keep last values in order to avoid sending them again if values does not require an update.
@@ -67,9 +67,9 @@ public:
     //Motor data structure
     typedef struct
     {
-        int id;                                 //Unique identifier for every motor
-        int speed, lastSpeed;                   //It is used as offset if packet also contain speed/direction packet
-        DIRECTION direction, lastDirection;     //Also used as offset if motor contain speed/direction packet
+        int id;                                     //Unique identifier for every motor
+        int speed, lastSpeed;                       //It is used as offset if packet also contain speed/direction packet
+        DIRECTION direction, lastDirection;         //Also used as offset if motor contain speed/direction packet
 
         std::string* to_array()
         {
@@ -136,7 +136,7 @@ public:
     //Public methods and constructor
     DataStructure(int motors_number = 4);
     bool parseDataString(const std::string &data);
-    std::string buildDataString();
+    std::string buildDataString(bool optimized = false);
 
     //Gets and sets
 

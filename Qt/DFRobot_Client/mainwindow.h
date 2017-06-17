@@ -62,7 +62,7 @@ private:
 	QWidget *containerGauge;
 
     //Data structure handler
-    //DataStructure data = new DataStructure(4, 0, 250);
+    DataStructure *dataStructure = Q_NULLPTR;
 
 	//Need a global variable to store time lapsed between serial write sessions
 	qint64 prevMillis = 0;
