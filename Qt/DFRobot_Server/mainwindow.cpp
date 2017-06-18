@@ -541,6 +541,9 @@ bool MainWindow::serialAttemptReconnect()
 */
 void MainWindow::on_startServerButton_clicked()
 {
+    //Enable forward mode when listening on network
+    ui->forwardModeCheckBox->setChecked(true);
+
     // Autofill ip address field when working on localhost
     QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
@@ -576,9 +579,17 @@ void MainWindow::on_startServerButton_clicked()
 
 void MainWindow::processRecvData(QString data)
 {
-    ui->rcConnectionConsoleTextBox->appendPlainText(data);
+    data = data.replace("<>", "|");
 
-    dataStructure->parseDataString( data.toStdString() );
+    ui->rcConnectionConsoleTextBox->appendPlainText(data);
+    qDebug() << "TCP RECV: " << data;
+
+    //Append all recv data to our dataStructure
+    if(!dataStructure->parseDataString( data.toStdString() ))
+    {
+        qDebug() << "TCP RECV FAILED: Corrupted packet...";
+        return;
+    }
 
     //Update sliders
     ui->speedSlider->setValue( dataStructure->getSpeed().currentVal );
@@ -596,64 +607,18 @@ void MainWindow::processRecvData(QString data)
     ui->pushButton_reverse3->setChecked( ((bool)(dataStructure->getMotorInfo(3).direction))?false:true );
     ui->pushButton_reverse4->setChecked( ((bool)(dataStructure->getMotorInfo(4).direction))?false:true );
 
-
-    /*
-    QStringList motors = data.split(",");
-	for(int i=0; i<=5; i++)
+    if(ui->forwardModeCheckBox->isChecked())
     {
-        QString motor = motors[i].remove("[").remove("]");
-
-        int speed = motor.split("|")[0].toInt();
-        int direction = motor.split("|")[1].toInt();
-
-        switch(i)
-        {
-            case 0:
-            {
-                ui->motor1_slider->setValue(speed);
-                ui->pushButton_reverse1->setChecked( direction ? 0 : 1 );
-                break;
-            }
-
-            case 1:
-            {
-                ui->motor2_slider->setValue(speed);
-                ui->pushButton_reverse2->setChecked( direction ? 0 : 1 );
-                break;
-            }
-
-            case 2:
-            {
-                ui->motor3_slider->setValue(speed);
-                ui->pushButton_reverse3->setChecked( direction ? 0 : 1 );
-                break;
-            }
-
-            case 3:
-            {
-                ui->motor4_slider->setValue(speed);
-                ui->pushButton_reverse4->setChecked( direction ? 0 : 1 );
-                break;
-            }
-
-			case 4:
-			{
-				ui->speedSlider->setValue(direction);
-				break;
-			}
-
-			case 5:
-			{
-				ui->leftRightSlider->setValue(direction);
-				break;
-			}
-        }
+        //We just forward data to Arduino
+        serialSendDataToCar();
     }
-    */
 }
 
 void MainWindow::on_stopServerButton_clicked()
 {
+    //Enable forward mode when listening on network
+    ui->forwardModeCheckBox->setChecked(false);
+
     try
     {
         if(this->server != Q_NULLPTR && this->server)
@@ -674,6 +639,11 @@ void MainWindow::on_stopServerButton_clicked()
 void MainWindow::clientConnectionChanged(bool connection)
 {
     ui->rcConnectionClientStatus->setText( connection ? "CONNECTED" : "NOT CONNECTED" );
+    if(!connection)
+    {
+        on_emergencyPushButton_clicked();
+    }
+
 }
 
 //	  ____  _   _  ___
@@ -689,6 +659,9 @@ void MainWindow::on_motor1_slider_valueChanged(int value)
 	if( this->ui->offsetCheckBox->isChecked() )
 		return;
 
+    if(ui->forwardModeCheckBox->isChecked() == true)
+        return;
+
 	serialSendDataToCar();
 }
 
@@ -697,6 +670,9 @@ void MainWindow::on_motor2_slider_valueChanged(int value)
 	ui->motor2_speedLabel->setText( QString::number(value) );
 	if( this->ui->offsetCheckBox->isChecked() )
 		return;
+
+    if(ui->forwardModeCheckBox->isChecked() == true)
+        return;
 
 	serialSendDataToCar();
 }
@@ -707,6 +683,9 @@ void MainWindow::on_motor3_slider_valueChanged(int value)
 	if( this->ui->offsetCheckBox->isChecked() )
 		return;
 
+    if(ui->forwardModeCheckBox->isChecked() == true)
+        return;
+
 	serialSendDataToCar();
 }
 
@@ -716,12 +695,18 @@ void MainWindow::on_motor4_slider_valueChanged(int value)
 	if( this->ui->offsetCheckBox->isChecked() )
 		return;
 
+    if(ui->forwardModeCheckBox->isChecked() == true)
+        return;
+
 	serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_reverse1_clicked()
 {
     if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
+    if(ui->forwardModeCheckBox->isChecked() == true)
         return;
 
     serialSendDataToCar();
@@ -732,12 +717,20 @@ void MainWindow::on_pushButton_reverse2_clicked()
     if( this->ui->offsetCheckBox->isChecked() )
         return;
 
+    if(ui->forwardModeCheckBox->checkState() == true)
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_reverse3_clicked()
 {
     if( this->ui->offsetCheckBox->isChecked() )
+        return;
+
+    //On forward mode, send data to car only after we parse all data
+    //Sliders are updated one by one so we don't want to send fragmented data to car
+    if(ui->forwardModeCheckBox->checkState() == true)
         return;
 
     serialSendDataToCar();
@@ -748,24 +741,54 @@ void MainWindow::on_pushButton_reverse4_clicked()
     if( this->ui->offsetCheckBox->isChecked() )
         return;
 
+    if(ui->forwardModeCheckBox->isChecked() == true)
+        return;
+
     serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_minMotors_clicked()
 {
+    //We check this to make sure we don't send every slide changed value one by one.
+    //It will cause congestion of Serial interface dure to to fast data send
+    ui->forwardModeCheckBox->setChecked(true);
+
     ui->motor1_slider->setValue(ui->motor1_slider->minimum());
     ui->motor2_slider->setValue(ui->motor2_slider->minimum());
-    ui->motor3_slider->setValue(ui->motor3_slider->minimum()); QThread::msleep(50); //because I can!!!
+    ui->motor3_slider->setValue(ui->motor3_slider->minimum());
     ui->motor4_slider->setValue(ui->motor4_slider->minimum());
 
+    //Reverse changes
+    ui->forwardModeCheckBox->setChecked(false);
+
+    //Also append new data to dataStructure.
+    //On next implementations, data to Arduino will be send drectly from dataStructure and not from interface
+    ///
+
+    //Now we send all values updated at the same time
+    serialSendDataToCar();
 }
 
 void MainWindow::on_pushButton_maxMotors_clicked()
 {
+    //We check this to make sure we don't send every slide changed value one by one.
+    //It will cause congestion of Serial interface dure to to fast data send
+    ui->forwardModeCheckBox->setChecked(true);
+
     ui->motor1_slider->setValue(ui->motor1_slider->maximum());
     ui->motor2_slider->setValue(ui->motor2_slider->maximum());
-    ui->motor3_slider->setValue(ui->motor3_slider->maximum()); QThread::msleep(50);
+    ui->motor3_slider->setValue(ui->motor3_slider->maximum());
     ui->motor4_slider->setValue(ui->motor4_slider->maximum());
+
+    //Reverse changes
+    ui->forwardModeCheckBox->setChecked(false);
+
+    //Also append new data to dataStructure.
+    //On next implementations, data to Arduino will be send drectly from dataStructure and not from interface
+    ///
+
+    //Now we send all values updated at the same time
+    serialSendDataToCar();
 }
 
 void MainWindow::on_speedSlider_valueChanged(int value)
@@ -775,6 +798,9 @@ void MainWindow::on_speedSlider_valueChanged(int value)
 
     updateSpeedGauge(value);
     ui->speedLabel->setText(QString::number(value));
+
+    if(ui->forwardModeCheckBox->isChecked())
+        return;
 
     serialSendDataToCar();
 }
@@ -786,5 +812,52 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 
     ui->directionLabel->setText( QString::number(value) );
 
+    if(ui->forwardModeCheckBox->isChecked())
+        return;
+
     serialSendDataToCar();
+}
+
+void MainWindow::on_forwardModeCheckBox_toggled(bool checked)
+{
+    //Disable the rest of the stuff on forward mode
+    if(checked)
+    {
+        ui->motorsControlGroupBox->setEnabled(false);
+        ui->carControlGroupBox->setEnabled(false);
+    }
+    else
+    {
+        ui->motorsControlGroupBox->setEnabled(true);
+        ui->carControlGroupBox->setEnabled(true);
+    }
+}
+
+void MainWindow::on_emergencyPushButton_clicked()
+{
+    //Send safe brake to Arduino
+
+    //Update data structure
+    for(int i=1; i<=4; i++)
+        dataStructure->setMotorInfo(i, 0, DataStructure::FORWARD);
+    dataStructure->setSpeed(0);
+    dataStructure->setSteering(0);
+
+    //Update GUI
+    ui->motor1_slider->setValue(ui->motor1_slider->minimum());
+    ui->motor2_slider->setValue(ui->motor2_slider->minimum());
+    ui->motor3_slider->setValue(ui->motor3_slider->minimum());
+    ui->motor4_slider->setValue(ui->motor4_slider->minimum());
+
+    ui->pushButton_reverse1->setChecked(false);
+    ui->pushButton_reverse2->setChecked(false);
+    ui->pushButton_reverse3->setChecked(false);
+    ui->pushButton_reverse4->setChecked(false);
+
+    ui->speedSlider->setValue(0);
+    ui->leftRightSlider->setValue(0);
+
+    //Make sure we send brake to Arduino
+    serialSendDataToCar();
+
 }

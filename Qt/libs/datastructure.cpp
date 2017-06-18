@@ -125,6 +125,10 @@ std::string DataStructure::buildDataString(bool optimized)
 
 bool DataStructure::parseDataString(const std::string &data)
 {
+    //Cancel parsing if there are multiple messages concated
+    if(getNumberOfChars(data, GLOBALS::startToken) > 1)
+        return false;
+
     //this function receive data and have to parse it
     if( this->checkDataIntegrity(data) == false )
         return false;
@@ -152,7 +156,7 @@ bool DataStructure::parseDataString(const std::string &data)
         blocks[i].parse(currentBlock);
     }
 
-    //We got an array of blocks. Now we may want to fill our variables
+    //So far we got an array of blocks. Now we may want to fill our variables
 
     //Fill up the speed if we received a speed
     BLOCK_STRUCT speedBlock = getParamsByName(blocks, (const char)GLOBALS::speedIdentifier);
@@ -171,7 +175,6 @@ bool DataStructure::parseDataString(const std::string &data)
         if(!motorBlock.isEmpty())
             setMotorInfo(i, to_int(motorBlock.param_values[2]), (DIRECTION)to_int(motorBlock.param_values[1])); //A kind of internal API like a boss o_O
     }
-
     return true;
 }
 
@@ -211,7 +214,7 @@ bool DataStructure::checkDataIntegrity(const std::string &data)
 DataStructure::BLOCK_STRUCT DataStructure::getParamsByName(BLOCK_STRUCT *blocks, const char &name, int id)
 {
     DataStructure::BLOCK_STRUCT block;
-    for(int i=0; i < GLOBALS::MAX_BLOCKS_NUMBER; i++)
+    for(int i = GLOBALS::MAX_BLOCKS_NUMBER-1; i >= 0; i--)
     {
         if(!blocks[i].isEmpty())
         {
@@ -229,7 +232,7 @@ DataStructure::BLOCK_STRUCT DataStructure::getParamsByName(BLOCK_STRUCT *blocks,
             }
         }
         else
-            return block;
+            continue;   //check all elements in case one element is invalid
     }
     return block;
 }

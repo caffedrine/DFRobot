@@ -22,7 +22,7 @@ void TcpSocket::doConnect()
 
     connect(socket, SIGNAL(connected()),this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()),this, SLOT(disconnected()));
-    connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
+    //connect(socket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
 
     qDebug() << "Connecting...";
@@ -52,10 +52,10 @@ void TcpSocket::disconnected()
 	qDebug() << "disconnected...";
 }
 
-void TcpSocket::bytesWritten(qint64 bytes)
-{
-    //qDebug() << bytes << " bytes written...";
-}
+//void TcpSocket::bytesWritten(qint64 bytes)
+//{
+//    //qDebug() << bytes << " bytes written...";
+//}
 
 void TcpSocket::readyRead()
 {

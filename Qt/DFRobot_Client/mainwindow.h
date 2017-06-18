@@ -46,7 +46,6 @@ private slots:
 	//Methods. Too lazi to declare as private ^_^
 	void updateServer();
 	void updateSpeedGauge(int val);
-	void delay(long milis);
 
     void on_testButton_clicked();
 
@@ -66,6 +65,9 @@ private:
 
 	//Need a global variable to store time lapsed between serial write sessions
 	qint64 prevMillis = 0;
+
+    //A variable to sync data
+    bool canUpdateServer = true;
 
 };
 

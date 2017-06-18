@@ -78,6 +78,13 @@ MainWindow::~MainWindow()
 
 }
 
+//      ___    __  __   _
+//     / _ \  |  \/  | | |
+//    | | | | | |\/| | | |
+//    | |_| | | |  | | | |___
+//     \__\_\ |_|  |_| |_____|
+//  QML Related methods and stuff
+
 void MainWindow::updateSpeedGauge(int val)
 {
 	if(val < 0)
@@ -99,68 +106,76 @@ void MainWindow::updateSpeedGauge(int val)
 	}
 }
 
-void MainWindow::on_actionExit_triggered()
+void MainWindow::joystick_moved(double x, double y)
 {
-    this->close();
-}
+    //We need a function to mmap some values
+    auto map = [](double x, double in_min, double in_max, double out_min, double out_max)
+    {
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    };
 
-void MainWindow::on_m1slider_valueChanged(int value)
-{
-    ui->m1speedLabel->setText( QString::number(value) );
+    //We don't want to get maximum speed. It's risky ;)
+    int speedMin = -180, speedMax = 180;
+    int steerMin = -100, steerMax = 100;
+
+    //qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
+
+    canUpdateServer = false;
+    this->ui->speedSlider->setValue( map(y, -1.00000, 1.00000, speedMin, speedMax) );
+    this->ui->directionSlider->setValue( map(x, -1.00000, 1.00000, steerMin, steerMax) );
+    canUpdateServer = true;
+
     updateServer();
 }
-
-void MainWindow::on_m2slider_valueChanged(int value)
-{
-    ui->m2speedLabel->setText( QString::number(value) );
-    updateServer();
-}
-
-void MainWindow::on_m3slider_valueChanged(int value)
-{
-    ui->m3speedLabel->setText( QString::number(value) );
-    updateServer();
-}
-
-void MainWindow::on_m4slider_valueChanged(int value)
-{
-    ui->m4speedLabel->setText( QString::number(value) );
-    updateServer();
-}
-
+/*
+//     _____  ____  ____    __ ___  ____
+//    |_   _|/ ___||  _ \  / /|_ _||  _ \
+//      | | | |    | |_) |/ /  | | | |_) |
+//      | | | |___ |  __// /   | | |  __/
+//      |_|  \____||_|  /_/   |___||_|
+//  TCP/IP Connection methods and related here
+*/
 void MainWindow::on_connectButton_clicked()
 {
     if(hSocket != Q_NULLPTR)
     {
-		delete hSocket;
+        delete hSocket;
         hSocket = Q_NULLPTR;
     }
 
-	hSocket = new TcpSocket(this);
+    hSocket = new TcpSocket(this);
 
-	hSocket->setHostname(ui->ipTextBox->text());
-	hSocket->setPort(ui->portTextBox->text().toInt());
+    hSocket->setHostname(ui->ipTextBox->text());
+    hSocket->setPort(ui->portTextBox->text().toInt());
 
-	hSocket->doConnect();
+    hSocket->doConnect();
+}
+
+void MainWindow::on_disconnectButton_clicked()
+{
+    if(!hSocket)
+            return;
+
+    this->hSocket->doDisconnect();
 }
 
 void MainWindow::updateServer()
 {
-    /*
-    //Make sure we don't send to much data
-	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
-    if(currMillis - prevMillis < 10)
-	{
-		return;
-	}
-	prevMillis = currMillis;
-    //*/
 
-    if(!hSocket)
-    {
-        qDebug() << "TCP SEND: FAILED -> Connect to host first...";
-        return;
-    }
+    //Make sure we don't send to much data
+//	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
+//    if(currMillis - prevMillis < 10)
+//	{
+//		return;
+//	}
+//	prevMillis = currMillis;
+//    //*/
+
+//    if(!hSocket)
+//    {
+//        qDebug() << "TCP SEND: FAILED -> Connect to host first...";
+//        return;
+//    }
 
     //For now, we only send motors parameters
     DataStructure::Motor motors[5]; //Motor IDs should start from 1. This is why we have 5 elements;
@@ -197,19 +212,16 @@ void MainWindow::updateServer()
     dataStructure->setSpeed(carSpeed);
     dataStructure->setSteering(carSteering);
 
-//    for(int i=1; i <= 4; i++ )
-//        qDebug() << "Motor" << i << ": "
-//                 << dataStructure->getMotorInfo(i).id << " - "
-//                 << (int)dataStructure->getMotorInfo(i).direction << " - "
-//                 <<  dataStructure->getMotorInfo(i).speed;
-
-//    qDebug() << "Speed: " << dataStructure->getSpeed().currentVal << "\tLast speed: " << dataStructure->getSpeed().lastVal;
-//    qDebug() << "Steer: " << dataStructure->getSteering().currentVal << "\tLast steer: " << dataStructure->getSteering().lastVal;
+    //Update speed gauge here so have as accurate info as possible
+    updateSpeedGauge(dataStructure->getSpeed().currentVal);
 
     const std::string str = dataStructure->buildDataString(true);
     QString buildedDataString = QString::fromStdString( str );
+    if(buildedDataString.length() < 6 )
+        return;
 
-    if(this->hSocket->isAvailable())
+
+    if(this->hSocket != Q_NULLPTR && this->hSocket->isAvailable())
     {
         this->hSocket->write(buildedDataString);
 
@@ -223,60 +235,81 @@ void MainWindow::updateServer()
     }
 }
 
+void MainWindow::serverConnectionChanged(bool status)
+{
+    this->ui->connStatusLabel->setText( status ? "CONNECTED" : "NOT CONNECTED" );
+}
+
+//	  ____  _   _  ___
+//	 / ___|| | | ||_ _|
+//	| |  _ | | | | | |
+//	| |_| || |_| | | |
+//	 \____| \___/ |___|
+//	GUI Related methods
+
+void MainWindow::on_actionExit_triggered()
+{
+    this->close();
+}
+
+void MainWindow::on_m1slider_valueChanged(int value)
+{
+    ui->m1speedLabel->setText( QString::number(value) );
+
+    if(canUpdateServer)
+        updateServer();
+}
+
+void MainWindow::on_m2slider_valueChanged(int value)
+{
+    ui->m2speedLabel->setText( QString::number(value) );
+
+    if(canUpdateServer)
+        updateServer();
+}
+
+void MainWindow::on_m3slider_valueChanged(int value)
+{
+    ui->m3speedLabel->setText( QString::number(value) );
+
+    if(canUpdateServer)
+        updateServer();
+}
+
+void MainWindow::on_m4slider_valueChanged(int value)
+{
+    ui->m4speedLabel->setText( QString::number(value) );
+
+    if(canUpdateServer)
+        updateServer();
+}
+
 void MainWindow::on_speedSlider_valueChanged(int value)
 {
 	this->ui->speedLabel->setText(QString::number(value));
-	updateSpeedGauge(value);
 
-	updateServer();
+    if(canUpdateServer)
+        updateServer();
 }
 
 void MainWindow::on_directionSlider_valueChanged(int value)
 {
 	this->ui->directionLabel->setText(QString::number(value));
-	updateSpeedGauge(value);
 
-	updateServer();
+    if(canUpdateServer)
+        updateServer();
 }
 
 void MainWindow::on_emergencyButton_clicked()
 {
-	this->ui->speedSlider->setValue(0);
+    canUpdateServer = false;    //Prevent sending too much data. We want to send booth changes at the same time
+
+    this->ui->speedSlider->setValue(0);
 	this->ui->directionSlider->setValue(0);
-	delay(200);
+
+    canUpdateServer = true;
+
 	updateServer();
-}
-
-void MainWindow::delay(long milis)
-{
-	QTime dieTime= QTime::currentTime().addMSecs(milis);
-	while (QTime::currentTime() < dieTime)
-		QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
-}
-
-int map(double x, double in_min, double in_max, double out_min, double out_max)
-{
-	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-void MainWindow::joystick_moved(double x, double y)
-{
-	//qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
-	this->ui->speedSlider->setValue( map(y, -1.00000, 1.00000, -255, +255) );
-	this->ui->directionSlider->setValue( map(x, -1.00000, 1.00000, -255, +255) );
-}
-
-void MainWindow::serverConnectionChanged(bool status)
-{
-	this->ui->connStatusLabel->setText( status ? "CONNECTED" : "NOT CONNECTED" );
-}
-
-void MainWindow::on_disconnectButton_clicked()
-{
-	if(!hSocket)
-			return;
-
-    this->hSocket->doDisconnect();
 }
 
 void MainWindow::on_testButton_clicked()

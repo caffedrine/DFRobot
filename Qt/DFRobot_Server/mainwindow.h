@@ -60,6 +60,8 @@ private slots:
     void on_pushButton_maxMotors_clicked();
     void on_speedSlider_valueChanged(int value);
     void on_leftRightSlider_valueChanged(int value);
+    void on_forwardModeCheckBox_toggled(bool checked);
+    void on_emergencyPushButton_clicked();
 
     //Some custom function
     void updateSpeedGauge(int val);

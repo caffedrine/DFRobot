@@ -76,10 +76,6 @@ void TcpServer::newConnection()
 void TcpServer::readyRead()
 {
     QString recvData = this->socket->readAll();
-
-    // read the data from the socket
-    qDebug() << recvData;
-
     ((MainWindow*)(parent()))->processRecvData(recvData);
 }
 
