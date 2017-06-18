@@ -123,32 +123,11 @@ std::string DataStructure::buildDataString(bool optimized)
     return buildedString;
 }
 
-bool DataStructure::parseDataString(const std::string &dataR)
+bool DataStructure::parseDataString(const std::string &data)
 {
-    std::string data = dataR;
-
     //this function receive data and have to parse it
-    if( this->checkDataIntegrity(dataR) == false )
+    if( this->checkDataIntegrity(data) == false )
         return false;
-
-    //Slow network tend to concat multiple messages. Check for this and merge into one message
-    if(1)//getNumberOfChars(dataR, GLOBALS::startToken) > 1)
-    {
-        //This mean we have to messages concated: ..><..
-        // :( char to string
-        std::string messagesCommonPoint(1, GLOBALS::endToken);
-        std::string messagesCommonPoint2(1, GLOBALS::startToken);
-        messagesCommonPoint += messagesCommonPoint2;
-
-        std::string blocksDelimiterString(1, GLOBALS::blocksDelimiter);
-
-        qDebug() << "REPL: " << QString::fromStdString(messagesCommonPoint);
-
-        replaceAll(data, messagesCommonPoint, blocksDelimiterString);
-    }
-
-    qDebug() << "STRRRR: " << QString::fromStdString(data);
-    return false;
 
     //EXAMPLE: >[m,{1;1;100}]|[m,{2;1;200}]|[m,{3;0;300}]|[m,{4;0;400}]|[s,{255}]|[d,{123}]<
     //Regex like a boss? Naa, not on arduino :(
