@@ -239,7 +239,7 @@ DataStructure::BLOCK_STRUCT DataStructure::getParamsByName(BLOCK_STRUCT *blocks,
 /*
 //   _   _   _____   ___   _       ____
 //  | | | | |_   _| |_ _| | |     / ___|
-//  | | | |   | |    | |  | |     \___ \
+//  | | | |   | |    | |  | |     \___ \``
 //  | |_| |   | |    | |  | |___   ___) |
 //   \___/    |_|   |___| |_____| |____/
 */

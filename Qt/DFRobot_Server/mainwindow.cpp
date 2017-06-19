@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     containerGauge->setMinimumSize(160, 160);
     containerGauge->setMaximumSize(160, 160);
     containerGauge->setFocusPolicy(Qt::TabFocus);
-    viewGauge->setSource(QUrl("../CircularGauge.qml"));
+    viewGauge->setSource(QUrl("../qml/CircularGauge.qml"));
     ui->verticalLayout->addWidget(containerGauge);
 
 	//Startup functions - Auto start TCP/IP server and connect au Arduino on startup

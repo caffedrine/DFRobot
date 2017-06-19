@@ -27,11 +27,24 @@ SOURCES +=  main.cpp\
             mainwindow.cpp \
             tcpserver.cpp \
             ../libs/datastructure.cpp \
+            ../libs/Communication/GUI.cpp \
+            ../libs/Communication/Joystick.cpp \
+            ../libs/Communication/Serial.cpp \
+            ../libs/Communication/I2C.cpp \
+            ../libs/Communication/TCPClient.cpp \
+            ../libs/Communication/TCPServer.cpp \
             serialconn.cpp
 
 HEADERS  += mainwindow.h \
             tcpserver.h \
             ../libs/datastructure.h \
+            ../libs/Communication/ICommunication.h \
+            ../libs/Communication/GUI.h \
+            ../libs/Communication/Joystick.h \
+            ../libs/Communication/Serial.h \
+            ../libs/Communication/I2C.h \
+            ../libs/Communication/TCPClient.h \
+            ../libs/Communication/TCPServer.h \
             serialconn.h
 
 FORMS    += mainwindow.ui
