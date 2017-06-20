@@ -571,10 +571,16 @@ void MainWindow::on_startServerButton_clicked()
     //Proceed to start the server
     //Note that ip address from text box is just informative. Normally, server will be
     //available from all computer ip addresses, including 127.0.0.1
-    if(server)
+	if(server != Q_NULLPTR || server)
+	{
         delete server;
+		server = Q_NULLPTR;
+	}
 
     server = new TcpServer(this);
+	connect(server, SIGNAL(tcpProcessRecvData(QString)), this, SLOT(tcpProcessRecvData(QString)) );
+	connect(server, SIGNAL(tcpClientConnectionChanged(bool)), this, SLOT(tcpClientConnectionChanged(bool)));
+
     server->setPort( QString(ui->rcConnectionPortTextBox->text()).toInt() );
 
     if(server->startServer())
@@ -583,7 +589,7 @@ void MainWindow::on_startServerButton_clicked()
     }
 }
 
-void MainWindow::processRecvData(QString data)
+void MainWindow::tcpProcessRecvData(QString data)
 {
     data = data.replace("<>", "|");
 
@@ -642,7 +648,7 @@ void MainWindow::on_stopServerButton_clicked()
     }
 }
 
-void MainWindow::clientConnectionChanged(bool connection)
+void MainWindow::tcpClientConnectionChanged(bool connection)
 {
     ui->rcConnectionClientStatus->setText( connection ? "CONNECTED" : "NOT CONNECTED" );
     if(!connection)

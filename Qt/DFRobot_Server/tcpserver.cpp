@@ -5,6 +5,26 @@ TcpServer::TcpServer(QObject *parent) : QObject(parent)
 
 }
 
+TcpServer::~TcpServer()
+{
+	if(this->socket != Q_NULLPTR)
+	{
+		if(socket)
+			socket->disconnectFromHost();
+
+		delete socket;
+		socker = Q_NULLPTR;
+	}
+
+	if(this->server != Q_NULLPTR)
+	{
+		if(server)
+			server->disconnect();
+		delete server;
+		server  = Q_NULLPTR;
+	}
+}
+
 bool TcpServer::startServer()
 {
     server = new QTcpServer(this);
@@ -49,22 +69,19 @@ void TcpServer::stopServer()
 void TcpServer::newConnection()
 {
     clientConnected();
-    qDebug() << "A NEW CONECTION: ESTABLISHED";
+	qDebug() << "TCP: A NEW CONECTION WAS ESTABLISHED";
 
     // need to grab the socket
     this->socket = server->nextPendingConnection();
     this->socket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-    connect(this->socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+	connect(this->socket, SIGNAL(readyRead()), this, SLOT(tcpReadyRead()));
     connect(this->socket, SIGNAL(connected()), this, SLOT(clientConnected()));
     connect(this->socket, SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
     //connect(this->socket, SIGNAL());
 
 
     //((MainWindow*)(parent()))->clientConnected();
-
-    //((MainWindow*)(parent()))->
-
     socket->write("Hello! I'am the robot you want to control!\r\n");
     socket->flush();
 
@@ -73,15 +90,8 @@ void TcpServer::newConnection()
     //socket->close();
 }
 
-void TcpServer::readyRead()
-{
-    QString recvData = this->socket->readAll();
-    ((MainWindow*)(parent()))->processRecvData(recvData);
-}
-
 qint64 TcpServer::write(QString msg)
 {
-
     if(this->server == Q_NULLPTR || this->server == 0)
     {
 		qDebug() << "TCP FAILED: Server is not started!";
@@ -112,12 +122,16 @@ bool TcpServer::getServerStatus()
 
 void TcpServer::clientConnected()
 {
-	qDebug() << "TCP: NEW CONNECTION ESTABLISHED";
-    ((MainWindow*)(parent()))->clientConnectionChanged(1);
+	emit tcpClientConnectionChanged(true);
 }
 
 void TcpServer::clientDisconnected()
 {
-	qDebug() << "TCP: A CONNECTION WAS CLOSED!";
-    ((MainWindow*)(parent()))->clientConnectionChanged(0);
+	emit tcpClientConnectionChanged(false);
+}
+
+void TcpServer::tcpReadyRead()
+{
+	QString recvData = this->socket->readAll();
+	emit tcpProcessRecvData(recvData);
 }

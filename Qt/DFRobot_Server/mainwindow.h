@@ -23,16 +23,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-public slots:
-	//TCP Socket methods
-	void processRecvData(QString data);
-    void clientConnectionChanged(bool);
-
 private slots:
 	//TCP Socket
 	//void setRCstatus(bool connected);
 	void on_startServerButton_clicked();
 	void on_stopServerButton_clicked();
+	void tcpProcessRecvData(QString data);
+	void tcpClientConnectionChanged(bool);
 
 	//Serial
 	void on_pushButton_connectArduino_clicked();

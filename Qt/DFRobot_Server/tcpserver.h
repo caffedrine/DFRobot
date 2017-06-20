@@ -20,11 +20,13 @@ public:
     qint64 write(QString data);
     bool getServerStatus();
 
-//signals:
+signals:
+	void tcpProcessRecvData(QString data);
+	void tcpClientConnectionChanged(bool isConnected);
 
-public slots:
+private slots:
+	void tcpReadyRead();
     void newConnection();
-    void readyRead();
     void clientConnected();
     void clientDisconnected();
 
