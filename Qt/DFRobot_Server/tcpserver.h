@@ -13,6 +13,7 @@ class TcpServer : public QObject
     Q_OBJECT
 public:
     explicit TcpServer(QObject *parent = 0);
+	~TcpServer();
 
     void setPort(int port);
     bool startServer();
@@ -29,7 +30,6 @@ private slots:
     void newConnection();
     void clientConnected();
     void clientDisconnected();
-
 
 private:
     QTcpServer *server = Q_NULLPTR; //Used to handle the server actions

@@ -105,19 +105,28 @@ std::string DataStructure::buildDataString(bool optimized)
 
     //Procees with bulding the string we want to send
     buildedString += GLOBALS::startToken;
-    for(int i=0; i < GLOBALS::MAX_BLOCKS_NUMBER; i++)
+
+	bool firstElement = false;
+	for(int i=0; i < GLOBALS::MAX_BLOCKS_NUMBER; i++)
     {
-        if( !(blocks[i].isEmpty()) )
-        {
-            buildedString += blocks[i].to_string();
-            if(!blocks[i+1].isEmpty())
-                buildedString += GLOBALS::blocksDelimiter;
-        }
-        else
-        {
-            //break;
-            continue;
-        }
+		if( !(blocks[i].isEmpty()) )
+		{
+			if(!firstElement)
+			{
+				buildedString += blocks[i].to_string();
+				firstElement = true;
+				continue;
+			}
+
+			buildedString += GLOBALS::blocksDelimiter;
+			buildedString += blocks[i].to_string();
+			continue;
+		}
+		else
+		{
+			//break;
+			continue;
+		}
     }
     buildedString += GLOBALS::endToken;
     return buildedString;

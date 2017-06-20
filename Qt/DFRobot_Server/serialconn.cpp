@@ -6,8 +6,11 @@ SerialConn::SerialConn()
 
 SerialConn::~SerialConn()
 {
-	if(pSerialPort == Q_NULLPTR || !pSerialPort)
+	if(pSerialPort != Q_NULLPTR)
 	{
+		if(pSerialPort->isOpen())
+			pSerialPort->close();
+
 		delete pSerialPort;
 		pSerialPort = Q_NULLPTR;
 	}
@@ -28,10 +31,11 @@ bool SerialConn::connect(QString portName, BaudRate baudRate)
 	//Make sure we are not already connected
 	if(pSerialPort != Q_NULLPTR || pSerialPort)
 	{
-		if(pSerialPort->isOpen())
+		if(pSerialPort && pSerialPort->isOpen())
 			pSerialPort->close();
 
 		delete pSerialPort;
+		pSerialPort = Q_NULLPTR;
 	}
 
 	if(portName.isEmpty())	//If you pass an empty name, pSerialPort will crash!

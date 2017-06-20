@@ -599,7 +599,7 @@ void MainWindow::tcpProcessRecvData(QString data)
     //Append all recv data to our dataStructure
     if(!dataStructure->parseDataString( data.toStdString() ))
     {
-        qDebug() << "TCP RECV FAILED: Corrupted packet...";
+		qDebug() << "TCP RECV FAILED: Corrupted packet: " << data;
         return;
     }
 

@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
-	/*
+
 	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 

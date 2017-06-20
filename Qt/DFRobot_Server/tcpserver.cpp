@@ -13,7 +13,7 @@ TcpServer::~TcpServer()
 			socket->disconnectFromHost();
 
 		delete socket;
-		socker = Q_NULLPTR;
+		socket = Q_NULLPTR;
 	}
 
 	if(this->server != Q_NULLPTR)
@@ -50,7 +50,7 @@ void TcpServer::stopServer()
     if(this->socket != Q_NULLPTR && this->socket)
     {
         this->socket->close();
-		qDebug() << "TCP SUCCESS: Socked closed!";
+		qDebug() << "TCP SUCCESS: Socket closed!";
     }
 
     if(this->server != Q_NULLPTR && this->server)
