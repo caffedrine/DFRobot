@@ -6,7 +6,7 @@ SerialConn::SerialConn()
 
 SerialConn::~SerialConn()
 {
-	if(!pSerialPort)
+	if(pSerialPort == Q_NULLPTR || !pSerialPort)
 	{
 		delete pSerialPort;
 		pSerialPort = Q_NULLPTR;
@@ -26,7 +26,7 @@ void SerialConn::setLastError(QString error)
 bool SerialConn::connect(QString portName, BaudRate baudRate)
 {
 	//Make sure we are not already connected
-	if(pSerialPort)
+	if(pSerialPort != Q_NULLPTR || pSerialPort)
 	{
 		if(pSerialPort->isOpen())
 			pSerialPort->close();
@@ -34,8 +34,11 @@ bool SerialConn::connect(QString portName, BaudRate baudRate)
 		delete pSerialPort;
 	}
 
-	//Initialize port
-	pSerialPort = 0;
+	if(portName.isEmpty())	//If you pass an empty name, pSerialPort will crash!
+	{
+		this->setLastError("Empty name!!!!! I HATE!!! empty names!!! Don't ever send me an empty name again! Empty names crash me :(!!!");
+		return false;
+	}
 
 	//Create a new instance
 	pSerialPort = new QSerialPort();

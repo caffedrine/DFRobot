@@ -14,12 +14,12 @@ bool TcpServer::startServer()
 
     if(!server->listen(QHostAddress::Any, this->port))
     {
-        qDebug() << "FAILED: Server could not start!";
+		qDebug() << "TCP FAILED: Server could not start!";
         return false;
     }
     else
     {
-        qDebug() << "SUCCESS: Server started!";
+		qDebug() << "TCP SUCCESS: Server started!";
         return true;
     }
 }
@@ -30,13 +30,13 @@ void TcpServer::stopServer()
     if(this->socket != Q_NULLPTR && this->socket)
     {
         this->socket->close();
-        qDebug() << "SUCCESS: Socked closed!";
+		qDebug() << "TCP SUCCESS: Socked closed!";
     }
 
     if(this->server != Q_NULLPTR && this->server)
     {
         this->server->close();
-        qDebug() << "SUCCESS: Server stopped!";
+		qDebug() << "TCP SUCCESS: Server stopped!";
     }
 
     delete socket;
@@ -84,13 +84,13 @@ qint64 TcpServer::write(QString msg)
 
     if(this->server == Q_NULLPTR || this->server == 0)
     {
-        qDebug() << "FAILED: Server is not started!";
+		qDebug() << "TCP FAILED: Server is not started!";
         return -1;
     }
 
     if(this->socket == Q_NULLPTR || !this->socket->isOpen() || !this->socket->isWritable())
     {
-        qDebug() << "FAILED: Can't write to socket. Is this open and writable?";
+		qDebug() << "TCP FAILED: Can't write to socket. Is this open and writable?";
         return -1;
     }
 
@@ -112,12 +112,12 @@ bool TcpServer::getServerStatus()
 
 void TcpServer::clientConnected()
 {
-    qDebug() << "NEW CONNECTION ESTABLISHED";
+	qDebug() << "TCP: NEW CONNECTION ESTABLISHED";
     ((MainWindow*)(parent()))->clientConnectionChanged(1);
 }
 
 void TcpServer::clientDisconnected()
 {
-    qDebug() << "A CONNECTION WAS CLOSED!";
+	qDebug() << "TCP: A CONNECTION WAS CLOSED!";
     ((MainWindow*)(parent()))->clientConnectionChanged(0);
 }

@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
-
+	/*
 	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 
@@ -161,7 +161,6 @@ void MainWindow::on_disconnectButton_clicked()
 
 void MainWindow::updateServer()
 {
-
     //Make sure we don't send to much data
 //	qint64 currMillis = QDateTime::currentMSecsSinceEpoch();
 //    if(currMillis - prevMillis < 10)
@@ -201,19 +200,244 @@ void MainWindow::updateServer()
 
     //Process data here in order to get clean movement of car
     /////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////
+	///
+	int m1Offset,   m2Offset,   m3Offset,   m4Offset;
+	int m1Speed,    m2Speed,    m3Speed,    m4Speed;
+	int m1Dir,      m2Dir,      m3Dir,      m4Dir;
 
+	int direction = 0;
+	int speed   = 0;
+
+	// Read offsets for motor calibration
+	m1Offset = motors[1].speed;
+	m2Offset = motors[2].speed;
+	m3Offset = motors[3].speed;
+	m4Offset = motors[4].speed;
+
+	// Read direction of rotation and intensyty
+	direction = carSteering;
+	// Read speed and direction
+	speed = carSpeed;
+
+	//Processing speed and stuff
+	//Setting up direction. Negative value means backward
+	if(speed < 0)
+	{
+		m1Dir = m2Dir = m3Dir = m4Dir = 0;
+		speed *= -1;
+	}
+	else
+		m1Dir = m2Dir = m3Dir = m4Dir = 1;
+
+	// Set all speed
+	m1Speed = m2Speed = m3Speed = m4Speed = speed;
+
+	if( !direction )
+	{
+		/*
+			If make motor as array:
+			int motors[motorsNumber];
+			int offsets[motorsNumber];
+
+			for(int i = 0, i < motorsNumber, i++ )
+			{
+				motors[i] = speed;
+				if( speed )
+				{
+					motors[i] = m1Speed + offsets[0];
+					if( motors[i] > 255 )
+						motors[i] = 255;
+				}
+			}
+
+		*/
+
+		if(speed)
+		{
+			m1Speed = m1Offset + speed;
+			if( m1Speed > 255 )
+				m1Speed = 255;
+
+			m2Speed = m2Offset + speed;
+			if( m2Speed > 255 )
+				m2Speed = 255;
+
+			m3Speed = m3Offset + speed;
+			if( m3Speed > 255 )
+				m3Speed = 255;
+
+			m4Speed = m4Offset + speed;
+			if( m4Speed > 255 )
+				m4Speed = 255;
+		}
+
+//            //We may want to add offsets
+//            if(     m1Speed + m1Offset > 255 ||
+//                    m2Speed + m2Offset > 255 ||
+//                    m3Speed + m3Offset > 255 ||
+//                    m4Speed + m4Offset > 255    )
+//            {
+//                //How much more
+//                if( m1Speed + m1Offset > 255    )
+//                {
+//                    overVal = (m1Speed + m1Offset) - 255;
+//                    m1Speed = m1Offset + speed - overVal;
+//                    //Or you can simply m1Speed = 255 if yuou don't like math	.
+//                }
+//                else if(m2Speed + m2Offset > 255)
+//                {
+//                    overVal = (m2Speed + m2Offset) - 255;
+//                    m2Speed = m2Offset + speed - overVal;
+//                }
+//                else if(m3Speed + m3Offset > 255)
+//                {
+//                    overVal = (m3Speed + m3Offset) - 255;
+//                    m3Speed = m3Offset + speed - overVal;
+//                }
+//                else if(m4Speed + m4Offset > 255)
+//                {
+//                    overVal = (m4Speed + m4Offset) - 255;
+//                    m4Speed = m4Offset + speed - overVal;
+//                }
+//            }
+//            // ???????
+//            else
+//            {
+//                m1Speed = speed + m1Offset;
+//                m2Speed = speed + m2Offset;
+//                m3Speed = speed + m3Offset;
+//                m4Speed = speed + m4Offset;
+//            }
+
+		// ****************** ???????????????
+//            if( !(m1Speed + m1Offset > 255) )
+//                m1Speed -= overVal;
+
+//            if( !(m2Speed + m2Offset > 255) )
+//                m2Speed -= overVal;
+
+//            if( !(m3Speed + m3Offset > 255) )
+//                m3Speed -= overVal;
+
+//            if( !(m4Speed + m4Offset > 255) )
+//                m4Speed -= overVal;
+		// ****************** **************
+
+//            //hOWEVER, IF SPEED = 0, we want breake
+//            if(speed == 0)
+//                m1Speed = m2Speed = m3Speed = m4Speed = 0;
+
+		// *******************************
+	}
+	else
+	{
+	//Process direction
+	//Check if direction is changed and change motors values again
+//		direction = this->ui->leftRightSlider->value();
+
+//		if(direction != 0)
+//		{
+		//this mean that we have to change direction of pair motors
+		//M1 = M4
+		//M2 = M3
+
+		bool minus = false;
+
+		if(direction < 0)
+		{
+			//We need positive direction as it is easier to work with
+			direction *= -1;
+			minus = true;
+		}
+
+		int hSpeed = speed;
+		int lSpeed = ( speed * ( 100 - direction ) ) / 100;
+
+		if( minus )
+		{
+//				//We need positive direction as it is easier to work with
+//				direction *= -1;
+
+			m1Speed = m4Speed = lSpeed;
+			m2Speed = m3Speed = hSpeed;
+
+//				m1Speed -= (direction/2);
+//				if(m1Speed < 0)
+//				{
+//					m1Speed *=-1;
+//					m1Dir = (m1Dir == 0)?1:0;
+//				}
+
+//				m4Speed -= (direction/2);
+//				if(m4Speed < 0)
+//				{
+//					m4Speed *=-1;
+//					m4Dir = (m4Dir == 0)?1:0;
+//				}
+
+//				m2Speed += (direction/2);
+//				if(m2Speed > 255)
+//					m2Speed = 255;
+
+//				m3Speed += (direction/2);
+//				if(m3Speed > 255)
+//					m3Speed = 255;
+		}
+		else
+		{
+			m1Speed = m4Speed = hSpeed;
+			m2Speed = m3Speed = lSpeed;
+
+//				//we have to move right with k coeficient = direction
+//				m1Speed += (direction/2);
+//				if(m1Speed > 255)
+//					m1Speed = 255;
+
+//				m4Speed += (direction/2);
+//				if(m4Speed > 255)
+//					m4Speed = 255;
+
+//				m2Speed -= (direction/2);
+//				if(m2Speed < 0)
+//				{
+//					m2Speed *=-1;
+//					m2Dir = (m2Dir == 0)?1:0;
+//				}
+
+//				m3Speed -= (direction/2);
+//				if(m3Speed < 0)
+//				{
+//					m3Speed *=-1;
+//					m3Dir = (m3Dir == 0)?1:0;
+//				}
+		}
+	}
+
+	motors[1].speed = m1Speed;
+	motors[1].direction = (DataStructure::DIRECTION)m1Dir;
+
+	motors[2].speed = m2Speed;
+	motors[2].direction = (DataStructure::DIRECTION)m2Dir;
+
+	motors[3].speed = m3Speed;
+	motors[3].direction = (DataStructure::DIRECTION)m3Dir;
+
+	motors[4].speed = m4Speed;
+	motors[4].direction = (DataStructure::DIRECTION)m4Dir;
 
     /////////////////////////////////////////////////////////
     //Fill values into dataStructure
-    for(int i=1; i<=4; i++)
+	for(int i=1; i<=4; i++)
         dataStructure->setMotorInfo(i, motors[i].speed, motors[i].direction);
 
-    //Setting speed and steering
-    dataStructure->setSpeed(carSpeed);
-    dataStructure->setSteering(carSteering);
+	//Setting speed and steering
+	///We process those data here. So the car will expect only values for motors.
+	//dataStructure->setSpeed(carSpeed);
+	//dataStructure->setSteering(carSteering);
 
     //Update speed gauge here so have as accurate info as possible
-    updateSpeedGauge(dataStructure->getSpeed().currentVal);
+	updateSpeedGauge(carSpeed);
 
     const std::string str = dataStructure->buildDataString(true);
     QString buildedDataString = QString::fromStdString( str );

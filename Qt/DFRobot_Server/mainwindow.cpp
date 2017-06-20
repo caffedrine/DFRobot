@@ -21,9 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->verticalLayout->addWidget(containerGauge);
 
 	//Startup functions - Auto start TCP/IP server and connect au Arduino on startup
-//    this->serialAttemptReconnect();
+	this->serialAttemptReconnect();
     on_startServerButton_clicked();
-
 
     //Init data structure
     dataStructure = new DataStructure(4);
@@ -71,6 +70,9 @@ void MainWindow::on_pushButton_connectArduino_clicked()
 
 	if(serialPort != Q_NULLPTR)
 	{
+		if(serialPort->isOpen())
+			serialPort->disconnect();
+
 		delete serialPort;
 		serialPort = Q_NULLPTR;
 	}
@@ -81,16 +83,21 @@ void MainWindow::on_pushButton_connectArduino_clicked()
 	connect(serialPort, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setSerialPortStatus(bool)));
 	connect(serialPort, SIGNAL(readyRead()), this, SLOT(serialDataReceivingSlot()));
 
+
 	if(serialPort->connect(portName, this->baud))
 	{
 		qDebug() << "SUCCESS: You're now connected to Arduino!";
 	}
 	else
 	{
-		qDebug() << "FAILED: " << serialPort->getLastError();
-		delete serialPort;
-		serialPort = Q_NULLPTR;
+		qDebug() << "FAILED2CONN: " << serialPort->getLastError();
+		if(serialPort != Q_NULLPTR || serialPort)
+		{
+			delete serialPort;
+			serialPort = Q_NULLPTR;
+		}
 	}
+
 }
 
 void MainWindow::on_pushButton_updateList_clicked()
@@ -155,14 +162,14 @@ qint64 MainWindow::serialWrite(QString str)
 
 	if(serialPort == Q_NULLPTR)
 	{
-		qDebug() << "FAILED: Please connect to Arduino board first!";
+		qDebug() << "ARDUINO SEND: Please connect to Arduino board first!";
 		return false;
 	}
 
 	qint64 bytesWritten = serialPort->write(str);
 	if( bytesWritten > 0)
 	{
-		QString dbgStr = "SUCCESS: SEND (" + QString::number(bytesWritten) + "bytes): " + str;
+		QString dbgStr = "ARD SUCCESS SEND (" + QString::number(bytesWritten) + "bytes): " + str;
 		qDebug() << dbgStr;
 	}
 	else
@@ -197,7 +204,7 @@ void MainWindow::serialSendDataToCar()
 {
 	QString msg = ""; // [M1,0,255] - motor, direction, speed
 
-	if(ui->offsetCheckBox->isChecked() == false)
+	if(ui->offsetCheckBox->isChecked() == false || ui->forwardModeCheckBox->isChecked() == true)
 	{
 		msg += "[M1,";
 		msg += ui->pushButton_reverse1->isChecked() ? "1" : "0";
@@ -230,7 +237,6 @@ void MainWindow::serialSendDataToCar()
 		int m1Dir,      m2Dir,      m3Dir,      m4Dir;
 
 		int direction;
-
 		int speed   = 0;
 
 		// Read offsets for motor calibration
@@ -464,26 +470,26 @@ void MainWindow::serialSendDataToCar()
 		msg += "]";
 
 	}
-	//qDebug() << msg << "\n";
 
-
-//	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
-//    {
-//        //It will crash anyway if prefix/device is wrong :(
-//        try
-//        {
-//            if(this->serialAttemptReconnect())
-//                serialWrite(msg);
-//        }
-//        catch(...)
-//        {
-//            qDebug() << "FAIL: Fatal error on Serial port reconnect!";
-//        }
-//    }
-//    else
-//    {
-//        serialWrite(msg);
-//    }
+	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
+	{
+		//It will crash anyway if prefix/device is wrong :(
+		try
+		{
+			if(this->serialAttemptReconnect())
+				serialWrite(msg);
+			else
+				qDebug() << "ARD SEND: No Arduino connection!";
+		}
+		catch(...)
+		{
+			qDebug() << "ARD SEND: Fatal error on Serial port reconnect (THIS IS BAD)";
+		}
+	}
+	else
+	{
+		serialWrite(msg);
+	}
 }
 
 bool MainWindow::serialAttemptReconnect()
