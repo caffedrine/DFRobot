@@ -68,7 +68,7 @@ private:
 
 	//Serial port handler
 	class SerialConn *serialPort = Q_NULLPTR;
-    SerialConn::BaudRate baud = QSerialPort::Baud19200;
+	SerialConn::BaudRate baud = QSerialPort::Baud115200;
 
 	//TCP Server Handler
 	class TcpServer *server = Q_NULLPTR;

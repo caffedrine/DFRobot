@@ -96,7 +96,6 @@ std::string DataStructure::buildDataString(bool optimized)
     //Add custom values following the above pattern
     //////////// Custom values ////////////////////
     //// blocks[6].build() or blocks[6].parse()////
-
     ///////////////////////////////////////////////
 
 
