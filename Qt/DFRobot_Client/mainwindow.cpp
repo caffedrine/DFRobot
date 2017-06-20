@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
-
+	/*
 	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 
@@ -115,8 +115,8 @@ void MainWindow::joystick_moved(double x, double y)
     };
 
     //We don't want to get maximum speed. It's risky ;)
-    int speedMin = -180, speedMax = 180;
-    int steerMin = -100, steerMax = 100;
+	int speedMin = -180, speedMax = 150;
+	int steerMin = -100, steerMax = 90;
 
     //qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
 
@@ -190,10 +190,10 @@ void MainWindow::updateServer()
     motors[3].speed = ui->m3speedLabel->text().toInt();
     motors[4].speed = ui->m4speedLabel->text().toInt();
 
-	motors[1].direction = ui->m1DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
-	motors[2].direction = ui->m2DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
-	motors[3].direction = ui->m3DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
-	motors[4].direction = ui->m4DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
+	motors[1].direction = ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+	motors[2].direction = ui->m2DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+	motors[3].direction = ui->m3DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+	motors[4].direction = ui->m4DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
 
     carSteering = ui->directionLabel->text().toInt();
     carSpeed    = ui->speedLabel->text().toInt();

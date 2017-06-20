@@ -207,25 +207,25 @@ void MainWindow::serialSendDataToCar()
 	if(ui->offsetCheckBox->isChecked() == false || ui->forwardModeCheckBox->isChecked() == true)
 	{
 		msg += "[M1,";
-		msg += ui->pushButton_reverse1->isChecked() ? "1" : "0";
+		msg += ui->pushButton_reverse1->isChecked() ? "0" : "1";
 		msg += ",";
 		msg += QString::number(ui->motor1_slider->value());
 		msg += "]-";
 
 		msg += "[M2,";
-		msg += ui->pushButton_reverse2->isChecked() ? "1" : "0";
+		msg += ui->pushButton_reverse2->isChecked() ? "0" : "1";
 		msg += ",";
 		msg += QString::number(ui->motor2_slider->value());
 		msg += "]-";
 
 		msg += "[M3,";
-		msg += ui->pushButton_reverse3->isChecked() ? "1" : "0";
+		msg += ui->pushButton_reverse3->isChecked() ? "0" : "1";
 		msg += ",";
 		msg += QString::number(ui->motor3_slider->value());
 		msg += "]-";
 
 		msg += "[M4,";
-		msg += ui->pushButton_reverse4->isChecked() ? "1" : "0";
+		msg += ui->pushButton_reverse4->isChecked() ? "0" : "1";
 		msg += ",";
 		msg += QString::number(ui->motor4_slider->value());
 		msg += "]";
