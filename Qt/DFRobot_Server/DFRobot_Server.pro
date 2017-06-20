@@ -31,8 +31,8 @@ SOURCES +=  main.cpp\
             ../libs/Communication/Joystick.cpp \
             ../libs/Communication/Serial.cpp \
             ../libs/Communication/I2C.cpp \
-            ../libs/Communication/TCPClient.cpp \
-            ../libs/Communication/TCPServer.cpp \
+            #../libs/Communication/TCPClient.cpp \
+            #../libs/Communication/TCPServer.cpp \
             serialconn.cpp
 
 HEADERS  += mainwindow.h \
@@ -43,8 +43,8 @@ HEADERS  += mainwindow.h \
             ../libs/Communication/Joystick.h \
             ../libs/Communication/Serial.h \
             ../libs/Communication/I2C.h \
-            ../libs/Communication/TCPClient.h \
-            ../libs/Communication/TCPServer.h \
+            #../libs/Communication/TCPClient.h \
+            #../libs/Communication/TCPServer.h \
             serialconn.h
 
 FORMS    += mainwindow.ui
