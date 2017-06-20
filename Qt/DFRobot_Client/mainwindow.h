@@ -49,6 +49,8 @@ private slots:
 
     void on_testButton_clicked();
 
+	void on_leftRightSlider_valueChanged(int value);
+
 public slots:
 	void serverConnectionChanged(bool);
 

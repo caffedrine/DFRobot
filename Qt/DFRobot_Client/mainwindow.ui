@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>506</width>
-    <height>563</height>
+    <height>616</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -155,7 +155,7 @@
       <x>20</x>
       <y>180</y>
       <width>191</width>
-      <height>301</height>
+      <height>341</height>
      </rect>
     </property>
     <property name="title">
@@ -424,7 +424,7 @@
       <x>220</x>
       <y>10</y>
       <width>271</width>
-      <height>471</height>
+      <height>511</height>
      </rect>
     </property>
     <property name="title">
@@ -588,12 +588,50 @@
      </property>
      <layout class="QHBoxLayout" name="joystickLayout"/>
     </widget>
+    <widget class="QSlider" name="leftRightSlider">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>470</y>
+       <width>211</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>-255</number>
+     </property>
+     <property name="maximum">
+      <number>255</number>
+     </property>
+     <property name="singleStep">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="leftRightLabel">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>490</y>
+       <width>31</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="testButton">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>500</y>
+      <x>220</x>
+      <y>540</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -609,7 +647,7 @@
      <x>0</x>
      <y>0</y>
      <width>506</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

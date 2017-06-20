@@ -190,10 +190,10 @@ void MainWindow::updateServer()
     motors[3].speed = ui->m3speedLabel->text().toInt();
     motors[4].speed = ui->m4speedLabel->text().toInt();
 
-    motors[1].direction = ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
-    motors[2].direction = ui->m2DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
-    motors[3].direction = ui->m3DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
-    motors[4].direction = ui->m4DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD;
+	motors[1].direction = ui->m1DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
+	motors[2].direction = ui->m2DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
+	motors[3].direction = ui->m3DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
+	motors[4].direction = ui->m4DirButton->isChecked() ? DataStructure::FORWARD : DataStructure::BACKWARD;
 
     carSteering = ui->directionLabel->text().toInt();
     carSpeed    = ui->speedLabel->text().toInt();
@@ -597,4 +597,9 @@ void MainWindow::on_testButton_clicked()
 //    const std::string str = data->buildDataString();
 //    qDebug() << "BUILD: " << QString::fromStdString( str );
     //*/
+}
+
+void MainWindow::on_leftRightSlider_valueChanged(int value)
+{
+
 }

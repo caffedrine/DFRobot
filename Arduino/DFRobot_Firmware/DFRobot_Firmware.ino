@@ -8,6 +8,7 @@ namespace utils
 	void checkSerial();
 	void updateMotors();
 	void parseMessage(String msg);
+	void brakeIfNotHeardWithin(int interval);
 }
 
 ////////////////////////////////////////////////////////
@@ -52,14 +53,13 @@ DCMotor M4(11, 13, 0);
 
 void setup()
 {
-	Serial.begin(19200);
+	Serial.begin(115200);
 
 	//Stop all motors
 	utils::brake();
 }
 
 long lastTimeHeardFromHost = 0;
-
 void loop()
 {
 	//Read and parse serial message if available`
@@ -72,10 +72,8 @@ void loop()
 	utils::updateMotors();
 
 	//Brake if not hear from remote controller
-	//brakeIfNotHeardWithin(int interval);
+	//utils::brakeIfNotHeardWithin(10000);
 }
-
-
 
 namespace utils
 {
@@ -83,6 +81,7 @@ namespace utils
 	{
 		if (millis() - lastTimeHeardFromHost > interval)
 		{
+			lastTimeHeardFromHost = millis();
 			utils::brake();
 		}
 	}
