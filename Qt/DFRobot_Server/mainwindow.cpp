@@ -184,12 +184,6 @@ void MainWindow::setSerialPortStatus(bool connected)
 {
 	ui->arduinoConnectionStatusLabel->setText( connected ? "CONNECTED" : "NOT CONNECTED" );
 
-	if(!connected)
-	{
-		delete this->serialPort;
-		this->serialPort = Q_NULLPTR;
-	}
-
 	//Check also if server is still connected. In this case all board may have been powered off
 	if(server)
 	{
@@ -203,6 +197,9 @@ void MainWindow::setSerialPortStatus(bool connected)
 void MainWindow::serialSendDataToCar()
 {
 	QString msg = ""; // [M1,0,255] - motor, direction, speed
+
+    if(ui->arduinoConnectionStatusLabel->text().contains("NOT"))
+        this->serialAttemptReconnect();
 
 	if(ui->offsetCheckBox->isChecked() == false || ui->forwardModeCheckBox->isChecked() == true)
 	{
@@ -494,7 +491,7 @@ void MainWindow::serialSendDataToCar()
 
 bool MainWindow::serialAttemptReconnect()
 {
-	if(serialPort != Q_NULLPTR)
+    if(serialPort != Q_NULLPTR || serialPort)
 	{
 		delete serialPort;
 		serialPort = Q_NULLPTR;
