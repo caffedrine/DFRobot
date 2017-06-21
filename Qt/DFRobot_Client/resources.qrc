@@ -1,7 +1,9 @@
 <RCC>
-    <qresource prefix="/res">
-        <file>background.png</file>
-        <file>finger.png</file>
-        <file>virtual_joystick.qml</file>
+    <qresource prefix="/res"/>
+    <qresource prefix="/">
+        <file>qml/virtual_joystick.qml</file>
+        <file>qml/finger.png</file>
+        <file>qml/CircularGauge.qml</file>
+        <file>qml/background.png</file>
     </qresource>
 </RCC>

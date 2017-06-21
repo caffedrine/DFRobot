@@ -13,12 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
 	containerGauge->setMinimumSize(160, 160);
 	containerGauge->setMaximumSize(160, 160);
 	containerGauge->setFocusPolicy(Qt::TabFocus);
-	viewGauge->setSource(QUrl("../CircularGauge.qml"));
+	viewGauge->setSource(QUrl("qml/CircularGauge.qml"));
 	ui->verticalLayout->addWidget(containerGauge);
 
 	//lOAD JOYSTICK
 	QQuickView *view = new QQuickView();
-	view->setSource(QUrl("../virtual_joystick.qml"));
+	view->setSource(QUrl("qml/virtual_joystick.qml"));
 	view->setClearBeforeRendering(true);
 	view->setColor(QColor(Qt::transparent));
 	QQuickItem *root = view->rootObject();
@@ -641,6 +641,11 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
 			motors[i].speed = speed + motors[i].speed;	//because we already have offset stored here
+	}
+	else
+	{
+		for(int i=1; i<= 4; i++)
+			motors[i].speed = 0;	//because we already have offset stored here
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////

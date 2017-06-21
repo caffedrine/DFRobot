@@ -38,7 +38,8 @@ FORMS    += mainwindow.ui
 
 DISTFILES += \
     CircularGauge.qml \
-    virtual_joystick.qml
+    virtual_joystick.qml \
+    qml/background.png
 
 RESOURCES += \
     resources.qrc

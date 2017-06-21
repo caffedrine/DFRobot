@@ -119,7 +119,7 @@ void MainWindow::on_pushButton_updateList_clicked()
 
 void MainWindow::on_pushButton_disconnectArduino_clicked()
 {
-	if(!serialPort)
+	if(serialPort == Q_NULLPTR || !serialPort)
 	{
 		qDebug() << "FAILED: You're not connected to Arduino!";
 		return;
