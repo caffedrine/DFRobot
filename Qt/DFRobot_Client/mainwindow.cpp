@@ -58,6 +58,12 @@ MainWindow::MainWindow(QWidget *parent) :
     else
         ui->ipTextBox->setText("localhost");
     //*/
+
+	//Update sliders labels
+	ui->m1speedLabel->setText( QString::number(ui->m1slider->value()) );
+	ui->m2speedLabel->setText( QString::number(ui->m2slider->value()) );
+	ui->m3speedLabel->setText( QString::number(ui->m3slider->value()) );
+	ui->m4speedLabel->setText( QString::number(ui->m4slider->value()) );
 }
 
 MainWindow::~MainWindow()
@@ -608,15 +614,25 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 	DataStructure::Motor motors[5]; //Motor IDs should start from 1. This is why we have 5 elements;
 	int speed = value;
 
+	//custom offsets only for this function to go left and right.
+	//Initial offsets are also appended
+	int offset[] = {0, 0, 0, 0, 0};
+	offset[1] = 15;
+	offset[2] = 0;
+	offset[3] = 0;
+	offset[4] = 10;
+
 	//Setting up motors IDs
 	for(int i=1; i<=4; i++)
 		motors[i].id = i;
 
-	//Get values from GUI
+	//Get values from GUI (offsets)
 	motors[1].speed = ui->m1speedLabel->text().toInt();
 	motors[2].speed = ui->m2speedLabel->text().toInt();
 	motors[3].speed = ui->m3speedLabel->text().toInt();
 	motors[4].speed = ui->m4speedLabel->text().toInt();
+
+//	int tempSpeed = 0;
 
 	if(speed < 0)
 	{
@@ -624,23 +640,24 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 
 		///CAR should be moved on left side
 		//setting up motors directions
-		motors[1].direction = motors[3].direction = DataStructure::FORWARD;
-		motors[2].direction = motors[4].direction = DataStructure::BACKWARD;
+		motors[1].direction = motors[2].direction = DataStructure::FORWARD;
+		motors[3].direction = motors[4].direction = DataStructure::BACKWARD;
 
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
-			motors[i].speed = speed + motors[i].speed;	//because we already have offset stored here
+			motors[i].speed = speed + motors[i].speed + offset[i];	//because we already have offset stored here
 	}
 	else if(speed > 0)
 	{
 		///CAR should be moved on left side
 		//setting up motors directions
-		motors[1].direction = motors[3].direction = DataStructure::BACKWARD;
-		motors[2].direction = motors[4].direction = DataStructure::FORWARD;
+		motors[1].direction = motors[2].direction = DataStructure::BACKWARD;
+		motors[3].direction = motors[4].direction = DataStructure::FORWARD;
 
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
-			motors[i].speed = speed + motors[i].speed;	//because we already have offset stored here
+			motors[i].speed = speed + motors[i].speed + offset[i]; 	//because we already have offset stored here
+
 	}
 	else
 	{
@@ -655,7 +672,9 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 		dataStructure->setMotorInfo(i, motors[i].speed, motors[i].direction);	//Fill values in data structure so we can parse'em
 
 	const std::string str = dataStructure->buildDataString(true);
+
 	QString buildedDataString = QString::fromStdString( str );
+
 	if(buildedDataString.length() < 6 )
 		return;
 
