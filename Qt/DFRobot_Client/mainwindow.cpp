@@ -115,8 +115,8 @@ void MainWindow::joystick_moved(double x, double y)
     };
 
     //We don't want to get maximum speed. It's risky ;)
-	int speedMin = -180, speedMax = 150;
-	int steerMin = -100, steerMax = 90;
+	int speedMin = -150, speedMax = 150;
+	int steerMin = -90, steerMax = 90;
 
     //qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
 
@@ -530,6 +530,7 @@ void MainWindow::on_emergencyButton_clicked()
 
     this->ui->speedSlider->setValue(0);
 	this->ui->directionSlider->setValue(0);
+	this->ui->leftRightSlider->setValue(0);
 
     canUpdateServer = true;
 
@@ -601,5 +602,68 @@ void MainWindow::on_testButton_clicked()
 
 void MainWindow::on_leftRightSlider_valueChanged(int value)
 {
+	ui->leftRightLabel->setText( QString::number(value) );
 
+	//This slider makes car to move horizontally.
+	DataStructure::Motor motors[5]; //Motor IDs should start from 1. This is why we have 5 elements;
+	int speed = value;
+
+	//Setting up motors IDs
+	for(int i=1; i<=4; i++)
+		motors[i].id = i;
+
+	//Get values from GUI
+	motors[1].speed = ui->m1speedLabel->text().toInt();
+	motors[2].speed = ui->m2speedLabel->text().toInt();
+	motors[3].speed = ui->m3speedLabel->text().toInt();
+	motors[4].speed = ui->m4speedLabel->text().toInt();
+
+	if(speed < 0)
+	{
+		speed *= -1;
+
+		///CAR should be moved on left side
+		//setting up motors directions
+		motors[1].direction = motors[3].direction = DataStructure::FORWARD;
+		motors[2].direction = motors[4].direction = DataStructure::BACKWARD;
+
+		//Setting up motors speed + offset
+		for(int i=1; i<= 4; i++)
+			motors[i].speed = speed + motors[i].speed;	//because we already have offset stored here
+	}
+	else if(speed > 0)
+	{
+		///CAR should be moved on left side
+		//setting up motors directions
+		motors[1].direction = motors[3].direction = DataStructure::BACKWARD;
+		motors[2].direction = motors[4].direction = DataStructure::FORWARD;
+
+		//Setting up motors speed + offset
+		for(int i=1; i<= 4; i++)
+			motors[i].speed = speed + motors[i].speed;	//because we already have offset stored here
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//Sending motors values to car//Fill values into dataStructure
+	for(int i=1; i<=4; i++)
+		dataStructure->setMotorInfo(i, motors[i].speed, motors[i].direction);	//Fill values in data structure so we can parse'em
+
+	const std::string str = dataStructure->buildDataString(true);
+	QString buildedDataString = QString::fromStdString( str );
+	if(buildedDataString.length() < 6 )
+		return;
+
+	if(this->hSocket != Q_NULLPTR && this->hSocket->isAvailable())
+	{
+		this->hSocket->write(buildedDataString);
+
+		QString dbgStr = "TCP SEND: (" + QString::number(buildedDataString.size()) + "bytes): ";
+		dbgStr += buildedDataString;
+		qDebug() << dbgStr;
+	}
+	else
+	{
+		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+	}
 }

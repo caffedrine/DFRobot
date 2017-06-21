@@ -5,6 +5,7 @@
 #include <QtNetwork>
 #include <QDateTime>
 #include <QtQuick/QtQuick>
+#include <QtMath>
 
 #include "tcpsocket.h"
 #include "../libs/datastructure.h"
@@ -39,17 +40,19 @@ private slots:
     //Direction-Speed sliders signals
 	void on_speedSlider_valueChanged(int value);
 	void on_directionSlider_valueChanged(int value);
+	void on_leftRightSlider_valueChanged(int value);
 	void on_emergencyButton_clicked();
 
+	//Joystick movement slot
 	void joystick_moved(double x, double y);
 
-	//Methods. Too lazi to declare as private ^_^
+	//Methods
 	void updateServer();
 	void updateSpeedGauge(int val);
 
     void on_testButton_clicked();
 
-	void on_leftRightSlider_valueChanged(int value);
+
 
 public slots:
 	void serverConnectionChanged(bool);
