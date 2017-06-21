@@ -125,6 +125,8 @@ void MainWindow::on_pushButton_disconnectArduino_clicked()
 		return;
 	}
 
+	on_emergencyPushButton_clicked();
+
 	if(this->serialPort->disconnect())
 	{
 		qDebug() << "SUCCESS: DISCONNECTED!";
@@ -648,11 +650,16 @@ void MainWindow::on_stopServerButton_clicked()
 void MainWindow::tcpClientConnectionChanged(bool connection)
 {
     ui->rcConnectionClientStatus->setText( connection ? "CONNECTED" : "NOT CONNECTED" );
-    if(!connection)
+
+	if(connection)
+	{
+		serialAttemptReconnect();
+	}
+
+	if(!connection)
     {
         on_emergencyPushButton_clicked();
     }
-
 }
 
 //	  ____  _   _  ___
