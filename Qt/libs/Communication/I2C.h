@@ -9,6 +9,23 @@
 
 class I2C : public ICommands
 {
+public:
+    void I2C();
+    void ~I2C();
+
+    // Implemented methods from ICommunication
+    bool connect();
+    bool disconnect();
+    bool isConnected();
+    QString readAll();
+    qint64 write(QString);
+    QString getLastError();
+
+signals:
+    void connectionStatusChanged(bool newStatus);
+    void readyRead();
+
+private:
 
 };
 
