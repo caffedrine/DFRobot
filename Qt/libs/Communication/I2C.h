@@ -2,6 +2,7 @@
 #define I2C_H
 
 /// This may help: https://github.com/jrowberg/i2cdevlib
+/// https://github.com/piranha32/IOoo/blob/master/include/I2C.h
 
 /** I will implement this on Linux as it is nearly impossible to have a portable code.
   * This is the class which manage I2C connection. It implements ICommands interface.
