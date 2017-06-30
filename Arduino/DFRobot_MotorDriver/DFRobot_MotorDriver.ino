@@ -11,24 +11,31 @@
  */
 
 #include <Arduino.h>
+#include "DCMotor.h"
 #include "PWM.h"
 
 //use pin 11 on the Mega instead, otherwise there is a frequency cap at 31 Hz
-int led = 3;                	// the pin that the LED is attached to
-int brightness = 0;        	// how bright the LED is
-int fadeAmount = 5;         	// how many points to fade the LED by
-int32_t frequency = 1; 		//frequency (in Hz)
+int motorPin = 3;
+int speed = 0;
+int32_t frequency = 100; 		//frequency (in Hz) - 5000
 
 void setup()
 {
+	//Set pin as output
+	pinMode(motorPin, OUTPUT);
+	pinMode(6, OUTPUT);
+	pinMode(5, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(11, OUTPUT);
+
 	//initialize all timers except for 0, to save time keeping functions
 	InitTimersSafe();
 	Serial.begin(115200);
 
 	//sets the frequency for the specified pin
-	bool success = SetPinFrequencySafe(led, frequency);
+	bool success = SetPinFrequencySafe(motorPin, frequency);
 
-	//if the pin frequency was set successfully, turn pin 13 on
+	//if the pin frequency was set successfully
 	if (success)
 	{
 		Serial.println("SUCCCESS");
@@ -42,5 +49,11 @@ void setup()
 void loop()
 {
 	//use this functions instead of analogWrite on 'initialized' pins
-	pwmWrite(led, brightness);
+	pwmWrite(motorPin, speed);
+
+	//analogWrite(3, speed);
+//	analogWrite(5, speed);
+//	analogWrite(6, speed);
+//	analogWrite(11, speed);
+
 }

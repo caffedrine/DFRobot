@@ -72,7 +72,7 @@ void loop()
 	utils::updateMotors();
 
 	//Brake if not hear from remote controller
-	//1utils::brakeIfNotHeardWithin(10000);
+	//utils::brakeIfNotHeardWithin(10000);
 }
 
 namespace utils
