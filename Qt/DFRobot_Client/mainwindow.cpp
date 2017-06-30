@@ -450,19 +450,26 @@ void MainWindow::updateServer()
     if(buildedDataString.length() < 6 )
         return;
 
+	tcpWrite(buildedDataString);
+}
 
-    if(this->hSocket != Q_NULLPTR && this->hSocket->isAvailable())
-    {
-        this->hSocket->write(buildedDataString);
+qint64 MainWindow::tcpWrite(QString data)
+{
+	if(this->hSocket != Q_NULLPTR && this->hSocket->isAvailable())
+	{
+		this->hSocket->write(data);
 
-        QString dbgStr = "TCP SEND: (" + QString::number(buildedDataString.size()) + "bytes): ";
-        dbgStr += buildedDataString;
-        qDebug() << dbgStr;
-    }
-    else
-    {
-        qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
-    }
+		QString dbgStr = "TCP SEND: (" + QString::number(data.size()) + "bytes): ";
+		dbgStr += data;
+		qDebug() << dbgStr;
+
+		return 1;
+	}
+	else
+	{
+		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
+		return -1;
+	}
 }
 
 void MainWindow::serverConnectionChanged(bool status)
@@ -488,6 +495,13 @@ void MainWindow::on_m1slider_valueChanged(int value)
 
     if(canUpdateServer)
         updateServer();
+
+	//Check if checkBox which indicate manual control on every motor is checked
+	if(ui->checkBox_controlIndependentMotors->isChecked())
+	{
+		DataStructure motor[1];
+		motor[0].setSpeed(value);
+	}
 }
 
 void MainWindow::on_m2slider_valueChanged(int value)

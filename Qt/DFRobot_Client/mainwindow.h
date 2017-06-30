@@ -48,11 +48,10 @@ private slots:
 
 	//Methods
 	void updateServer();
+	qint64 tcpWrite(QString data);
 	void updateSpeedGauge(int val);
 
     void on_testButton_clicked();
-
-
 
 public slots:
 	void serverConnectionChanged(bool);

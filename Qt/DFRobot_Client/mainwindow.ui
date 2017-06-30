@@ -429,6 +429,19 @@
       <bool>false</bool>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBox_controlIndependentMotors">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>310</y>
+       <width>171</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Independent motors</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
