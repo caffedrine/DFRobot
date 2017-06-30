@@ -499,8 +499,13 @@ void MainWindow::on_m1slider_valueChanged(int value)
 	//Check if checkBox which indicate manual control on every motor is checked
 	if(ui->checkBox_controlIndependentMotors->isChecked())
 	{
-		DataStructure motor[1];
-		motor[0].setSpeed(value);
+		//Build data structure and fill only current motor in
+		DataStructure motor;
+		motor.setMotorInfo(1, value, (ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD));
+
+		//Get string data and send to server
+		QString buildedStrin = QString::fromStdString( motor.buildDataString() );
+		this->tcpWrite(buildedStrin);
 	}
 }
 
@@ -510,6 +515,18 @@ void MainWindow::on_m2slider_valueChanged(int value)
 
     if(canUpdateServer)
         updateServer();
+
+	//Check if checkBox which indicate manual control on every motor is checked
+	if(ui->checkBox_controlIndependentMotors->isChecked())
+	{
+		//Build data structure and fill only current motor in
+		DataStructure motor;
+		motor.setMotorInfo(2, value, (ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD));
+
+		//Get string data and send to server
+		QString buildedStrin = QString::fromStdString( motor.buildDataString() );
+		this->tcpWrite(buildedStrin);
+	}
 }
 
 void MainWindow::on_m3slider_valueChanged(int value)
@@ -518,6 +535,18 @@ void MainWindow::on_m3slider_valueChanged(int value)
 
     if(canUpdateServer)
         updateServer();
+
+	//Check if checkBox which indicate manual control on every motor is checked
+	if(ui->checkBox_controlIndependentMotors->isChecked())
+	{
+		//Build data structure and fill only current motor in
+		DataStructure motor;
+		motor.setMotorInfo(3, value, (ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD));
+
+		//Get string data and send to server
+		QString buildedStrin = QString::fromStdString( motor.buildDataString() );
+		this->tcpWrite(buildedStrin);
+	}
 }
 
 void MainWindow::on_m4slider_valueChanged(int value)
@@ -526,6 +555,18 @@ void MainWindow::on_m4slider_valueChanged(int value)
 
     if(canUpdateServer)
         updateServer();
+
+	//Check if checkBox which indicate manual control on every motor is checked
+	if(ui->checkBox_controlIndependentMotors->isChecked())
+	{
+		//Build data structure and fill only current motor in
+		DataStructure motor;
+		motor.setMotorInfo(4, value, (ui->m1DirButton->isChecked() ? DataStructure::BACKWARD : DataStructure::FORWARD));
+
+		//Get string data and send to server
+		QString buildedStrin = QString::fromStdString( motor.buildDataString() );
+		this->tcpWrite(buildedStrin);
+	}
 }
 
 void MainWindow::on_speedSlider_valueChanged(int value)
@@ -704,4 +745,10 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 	{
 		qDebug() << "FAILED: Cant write to socket. Is it opened and readable?";
 	}
+}
+
+void MainWindow::on_checkBox_controlIndependentMotors_toggled(bool checked)
+{
+	if(!checked)
+		this->on_emergencyButton_clicked();
 }

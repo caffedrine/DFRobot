@@ -53,6 +53,8 @@ private slots:
 
     void on_testButton_clicked();
 
+	void on_checkBox_controlIndependentMotors_toggled(bool checked);
+
 public slots:
 	void serverConnectionChanged(bool);
 
