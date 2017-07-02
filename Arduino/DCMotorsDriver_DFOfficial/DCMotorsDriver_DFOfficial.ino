@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "my_util.h"
 
 //Standard PWM DC control
 int E1 = 5;     //M1 Speed Control
@@ -11,12 +12,6 @@ int E3 = 3;
 int E4 = 11;
 int M3 = 12;
 int M4 = 13;
-
-///For previous Romeo, please use these pins.
-//int E1 = 6;     //M1 Speed Control
-//int E2 = 9;     //M2 Speed Control
-//int M1 = 7;    //M1 Direction Control
-//int M2 = 8;    //M1 Direction Control
 
 void stop(void)                    //Stop
 {
@@ -79,44 +74,19 @@ void turn_R(char a, char b)             //Turn Right
 }
 void setup(void)
 {
-	int i;
-	for (i = 3; i <= 13; i++)
+	for (int i = 3; i <= 13; i++)
 		pinMode(i, OUTPUT);
-
 
 	Serial.begin(115200);      //Set Baud Rate
 	Serial.println("Run keyboard control");
 }
+
+int speed = 0;
 void loop(void)
 {
-	if (Serial.available())
+	if(Serial.available())
 	{
-		char val = Serial.read();
-		if (val != -1)
-		{
-			switch (val)
-			{
-				case 'w':      //Move Forward
-					advance(255, 255);   //move forward in max speed
-					break;
-				case 's':   //Move Backward
-					back_off(255, 255);   //move back in max speed
-					break;
-				case 'a':   //Turn Left
-					turn_L(100, 100);
-					break;
-				case 'd':   //Turn Right
-					turn_R(100, 100);
-					break;
-				case 'z':
-					Serial.println("Hello");
-					break;
-				case 'x':
-					stop();
-					break;
-			}
-		}
-		else
-			stop();
+		speed = to_int(Serial.readString());
 	}
+	analogWrite(E1, speed);
 }

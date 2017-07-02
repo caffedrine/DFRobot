@@ -47,7 +47,6 @@ private:
 	//Motor2: To move FORWARD, apply LOW to direction pin;
 	//We have to make all the stuff the same. So, all motors should move forward
 	//on MOTOR_FORWARD, or 1 logic.
-
 	bool forwardOn = 1;
 };
 

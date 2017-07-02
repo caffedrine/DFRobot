@@ -16,7 +16,7 @@
 
 //use pin 11 on the Mega instead, otherwise there is a frequency cap at 31 Hz
 int motorPin = 3;
-int speed = 0;
+int speed = 255;
 int32_t frequency = 100; 		//frequency (in Hz) - 5000
 
 void setup()
@@ -27,6 +27,7 @@ void setup()
 	pinMode(5, OUTPUT);
 	pinMode(3, OUTPUT);
 	pinMode(11, OUTPUT);
+	pinMode(12, OUTPUT);
 
 	//initialize all timers except for 0, to save time keeping functions
 	InitTimersSafe();
@@ -50,10 +51,4 @@ void loop()
 {
 	//use this functions instead of analogWrite on 'initialized' pins
 	pwmWrite(motorPin, speed);
-
-	//analogWrite(3, speed);
-//	analogWrite(5, speed);
-//	analogWrite(6, speed);
-//	analogWrite(11, speed);
-
 }

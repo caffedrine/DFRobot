@@ -673,9 +673,9 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 	//Initial offsets are also appended
 	int offset[] = {0, 0, 0, 0, 0};
 	offset[1] = 15;
-	offset[2] = 0;
+	offset[2] = 40;
 	offset[3] = 0;
-	offset[4] = 10;
+	offset[4] = 20;
 
 	//Setting up motors IDs
 	for(int i=1; i<=4; i++)
@@ -695,8 +695,8 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 
 		///CAR should be moved on left side
 		//setting up motors directions
-		motors[1].direction = motors[2].direction = DataStructure::FORWARD;
-		motors[3].direction = motors[4].direction = DataStructure::BACKWARD;
+		motors[1].direction = motors[3].direction = DataStructure::BACKWARD;
+		motors[2].direction = motors[4].direction = DataStructure::FORWARD;
 
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
@@ -706,8 +706,8 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 	{
 		///CAR should be moved on left side
 		//setting up motors directions
-		motors[1].direction = motors[2].direction = DataStructure::BACKWARD;
-		motors[3].direction = motors[4].direction = DataStructure::FORWARD;
+		motors[1].direction = motors[3].direction = DataStructure::FORWARD;
+		motors[2].direction = motors[4].direction = DataStructure::BACKWARD;
 
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
