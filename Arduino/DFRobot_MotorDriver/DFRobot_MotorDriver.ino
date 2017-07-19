@@ -13,11 +13,12 @@
 #include <Arduino.h>
 #include "DCMotor.h"
 #include "PWM.h"
+#include "my_util.h"
 
 //use pin 11 on the Mega instead, otherwise there is a frequency cap at 31 Hz
 int motorPin = 3;
-int speed = 255;
-int32_t frequency = 100; 		//frequency (in Hz) - 5000
+int speed = 127;
+int32_t frequency = 5000; 		//frequency (in Hz) - 5000
 
 void setup()
 {
@@ -51,4 +52,11 @@ void loop()
 {
 	//use this functions instead of analogWrite on 'initialized' pins
 	pwmWrite(motorPin, speed);
+
+	//Update motors speeds from serial
+	if(Serial.available())
+		speed = to_int(Serial.readString());
+
+	//Print speed every 1 seconds
+	printPeriodicData("Speed: " + to_string(speed), 1000);
 }
