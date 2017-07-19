@@ -33,8 +33,8 @@ public:
     
     bool getClientStatus();     // Get status of client(s): connected/not connected
     
-    int clientWrite(const char *) const;  // Write data to first connected client
-    virtual std::string clientReadString();       // Read received string from first client
+    int clientWrite(const char *) const;        // Write data to first connected client
+    virtual std::string clientReadString() {};     // Read received string from first client
 
     //Additional methods
     std::string getLastError(); //Return last error if any
@@ -47,6 +47,9 @@ private:
     
     /// A variable to store the state of server.
     bool serverListening = false; // This value became true on server is created and listen(...) was called
+    
+    /// A vaviable to store lastError
+    std::string lastError;
     
     // Some internal methods
     void setLastError(std::string err); // Set error when occurred

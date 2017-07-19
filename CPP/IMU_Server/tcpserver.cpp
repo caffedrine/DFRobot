@@ -23,6 +23,15 @@ TcpServer::TcpServer(uint16_t port)
     {
         error("Can't open socket!");
     }
+    
+    /// Also set Keep-Alive flag by default
+    int optval = 1;
+    int optlen = sizeof(optval);
+    if (setsockopt(hServer, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0)
+    {
+        close(hServer);
+        error("Can't set keep-alive flag!");
+    }
 }
 
 /**
@@ -30,7 +39,8 @@ TcpServer::TcpServer(uint16_t port)
  */
 TcpServer::~TcpServer()
 {
-
+    close(hServer);
+    close(hClient);
 }
 
 /**
@@ -57,14 +67,15 @@ bool TcpServer::startServer()
     server.sin_port = htons(port_number);   // host-to-network short
     
     // Binding socket we just created to an address!
-    if( bind(hServer, (const sockaddr *)&server, sizeof(server)) < 0 )
+    if (bind(hServer, (const sockaddr *) &server, sizeof(server)) < 0)
     {
         setLastError("Can't bind server socket! Are you sure if this port is not already used?");
         return false;
     }
     
     // Start socket listening for connections
-    if( listen(hServer, 3) < 0 )    // 3 is the number of connections that can be waiting while the process is handling a particular connection
+    if (listen(hServer, 3) <
+        0)    // 3 is the number of connections that can be waiting while the process is handling a particular connection
     {
         setLastError("Can't start listening on given port!");
         return false;
@@ -80,7 +91,7 @@ bool TcpServer::startServer()
  */
 bool TcpServer::stopServer()
 {
-    if(this->getServerStatus() == false)
+    if (this->getServerStatus() == false)
     {
         setLastError("Server was not even started to be stopped!");
         return false;
@@ -100,16 +111,20 @@ bool TcpServer::stopServer()
  */
 void TcpServer::waitForClients()
 {
-    struct sockaddr_in sockaddr_client; //Structure to store client details
+    struct sockaddr_in sockaddr_client;                     //Structure to store client details
     socklen_t client_addr_len = sizeof(sockaddr_client);    // size of structure
     
-    while(1)    // Wait until a client connects
+    while (1)    // Wait until a client connects
     {
         //Accepting client connection. It actually block process till the client is getting connected
-        
-        hClient = (socklen_t)accept(hServer, (struct sockaddr *)&sockaddr_client, &client_addr_len);
-        if(hClient >= 0)
+        hClient = (socklen_t) accept(hServer, (struct sockaddr *) &sockaddr_client, &client_addr_len);
+        if (hClient >= 0)
         {
+            //Let's also set Keep-Alive Flag
+            int optval = 1;
+            int optlen = sizeof(optval);
+            setsockopt(hClient, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+            
             // Extra check. If client is writable :)
             if (write(hClient, "Welcome  to IMU Server!\n", 24) >= 23)
             {
@@ -120,8 +135,8 @@ void TcpServer::waitForClients()
 }
 
 /**
- * This is a loop ans is running on another thread.
- * When client is sending data, the function clientReadAllString();
+ * This is a loop and is running on another thread.
+ * When client is sending data, this function triggers clientReadAllString();
  * That function is virtual and needs to be implemented in order to handle received data
  */
 void TcpServer::waitForIncomingClientData()
@@ -130,7 +145,7 @@ void TcpServer::waitForIncomingClientData()
 }
 
 /**
- * Throw an exception is machine doesn't meet requirements
+ * Throw an exception if machine doesn't meet requirements
  * @param message The error message!
  * @throw The cause!
  */
@@ -139,4 +154,22 @@ void TcpServer::error(std::string message)
     std::string errMsg = "TCP Server Error: ";  /// Error throwing header
     errMsg += message;
     throw (errMsg);
+}
+
+/**
+ * Set last error
+ * @param err The error string description
+ */
+void TcpServer::setLastError(std::string err)
+{
+    this->lastError = err;
+}
+
+/**
+ * Function to grab last error if any
+ * @return The description of last error.
+ */
+std::string TcpServer::getLastError()
+{
+    return this->lastError;
 }
