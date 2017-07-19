@@ -3,5 +3,5 @@ project(IMU_Server)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp tcpserver.cpp tcpserver.h)
 add_executable(IMU_Server ${SOURCE_FILES})
