@@ -142,12 +142,62 @@ void TcpServer::waitForClients()
 
 /**
  * This is a loop and is running on another thread.
- * When client is sending data, this function triggers clientReadAllString();
+ * When client is sending data, this function callback function for incoming data
  * That function is virtual and needs to be implemented in order to handle received data
  */
-void TcpServer::waitForIncomingClientData()
+void TcpServer::clientWaitForIncomingData()
 {
+    if(clientIncomingDataCallback == NULL)
+    {
+        this->setLastError("No callback function for data incoming set!");
+        return;
+    }
+    
+    // We read message chunk by chunk so we need a buffer to store data
+    char msgChunk[BUFFSIZE];
+    
+    // And a string to store result asuming that we won't receive huge amount of data
+    std::string recvData = "";
+    
+    while (true)   // Keep listening
+    {
+        memset(&msgChunk, 0, sizeof(msgChunk));
+        int readResult = (int) read(hClient, msgChunk, sizeof(msgChunk));
+        
+        if( readResult == 0) //reached end of file (EOF)
+        {
+            recvData += msgChunk;
+            recvData.erase( std::remove(recvData.begin(), recvData.end(), '\n'), recvData.end() );  //remove newlines first
+            recvData.push_back('\0');
+            
+            //clientIncomingDataCallback(recvData);   //send data to user to handle
+            recvData = "";  //We need to reset counter so we can read again
+        }
+        else if(readResult > 0)
+        {
+            recvData += msgChunk;
+            recvData.erase( std::remove(recvData.begin(), recvData.end(), '\n'), recvData.end() );  //remove newlines first
+    
+            clientIncomingDataCallback(recvData);   //send data to user to handle
+            recvData = "";  //We need to reset counter so we can read again
+        }
+        //Don't need to handle readResult < 0 - we catch here only valid received data
+    }
+}
 
+int TcpServer::clientWrite(const char *data)
+{
+    size_t dataLen = strlen(data);
+    ssize_t sendBytes = write(hClient, data, dataLen);
+    
+    // Check how many bytes were written
+    if(sendBytes < 0)
+    {
+        this->setLastError("Error on writing data to client socket!");
+        return -1;
+    }
+    
+    return (int)sendBytes;
 }
 
 /*  ____   ____   ___ __     __ _   _____  _____  ____

@@ -20,10 +20,17 @@
  * Use "hostname -I" to see internal IP you can use to connect. Also you can connect using "localhost" or
  * 127.0.0.1.
  */
+
+#define BUFFSIZE 512 // The size of the buffer used to read data
+
 class TcpServer
 {
 public:
-    TcpServer(uint16_t port);   // Constructor - Listening port must be passed
+    /// Callbacks functions - functions triggered on certain events
+    void (*clientIncomingDataCallback)(std::string);     // Pointer to a function to handle string received from client(s)
+    void (*newClientCallback)(void);                     // Not used for now
+    
+    explicit TcpServer(uint16_t port);   // Constructor - Listening port must be passed
     virtual ~TcpServer();
     
     bool startServer();         // Function to start the server
@@ -33,9 +40,12 @@ public:
     
     bool getClientStatus();     // Get status of client(s): connected/not connected
     
-    int clientWrite(const char *) const;        // Write data to first connected client
-    virtual std::string clientReadString() {};  // Read received string from first client
-
+    int clientWrite(const char *);                // Write data to first connected client
+    //virtual void clientReadString(std::string data) {};    // Read received string from first client
+    
+    // Wait for incoming data form clients but from another thread
+    void clientWaitForIncomingData();
+    
     //Additional methods
     std::string getLastError();                 //Return last error if any
 private:
@@ -53,9 +63,6 @@ private:
     
     // Some internal methods
     void setLastError(std::string err); // Set error when occurred
-    
-    // Wait for incoming data form clients but from another thread
-    void waitForIncomingClientData();
     
     // Throw critical errors
     void error(std::string);
