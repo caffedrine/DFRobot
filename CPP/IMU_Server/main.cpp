@@ -2,8 +2,8 @@
 
 #include "tcpserver.h"
 
-// TCP Server Handler
-TcpServer server(1338);
+/// TCP Server Handler
+TcpServer server(1337);
 
 /**
  * This function is used to handle input stream from connected clients
@@ -36,9 +36,13 @@ int main()
     server.waitForClients();    //Don't go forward until at least one client connects
     std::cout << "\x1b[1;32m" << "OK\n" << "\x1b[0m";
     
-    std::cout << "Enable data listening....\n" << std::flush;
-    server.clientWaitForIncomingData(); //Or you can run this on another thread and then do your stuff
-    //std::cout << "\x1b[1;32m" << "OK\n" << "\x1b[0m";
+    std::cout << "Enable data listening...." << std::flush;
+    server.clientWaitForIncomingDataSeparateThread();       // Launch data listener on another thread
+    std::cout << "\x1b[1;32m" << "OK\n" << "\x1b[0m" << std::flush;
+    
+    
+    while(1)    // Loop to prevent returning to keep link with client open
+                // Basically you can do your job next...
     
     // Don't forget to stop server
     server.stopServer();

@@ -47,6 +47,10 @@ TcpServer::~TcpServer()
 {
     close(hServer);
     close(hClient);
+    
+    // Clean threads
+    if(readerThread.joinable()) // any joinable thread will throw error is not called join() or detach()
+        readerThread.join();    // the rest will be done by thread destructor
 }
 
 /**
@@ -185,6 +189,20 @@ void TcpServer::clientWaitForIncomingData()
     }
 }
 
+/**
+ * Basically it launch the method above under a new separate thread to prevent blocking.
+ */
+void TcpServer::clientWaitForIncomingDataSeparateThread()
+{
+    readerThread = std::thread([this](){ clientWaitForIncomingData(); });   // Really, don't know how to explain this
+    readerThread.detach();                                                  // monster lambada. But it works ^_^
+}
+
+/**
+ * Function to write a const char * to client
+ * @param data Data wanted to be written to socket
+ * @return The number of bytes written to socket
+ */
 int TcpServer::clientWrite(const char *data)
 {
     size_t dataLen = strlen(data);
@@ -236,3 +254,4 @@ std::string TcpServer::getLastError()
 {
     return this->lastError;
 }
+

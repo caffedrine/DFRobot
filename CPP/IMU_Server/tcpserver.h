@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <thread>
 
 /**
  * Simple sockets wrapper.
@@ -45,6 +46,8 @@ public:
     
     // Wait for incoming data form clients but from another thread
     void clientWaitForIncomingData();
+    void clientWaitForIncomingDataSeparateThread();     // Run the same function on a separate thread. Now any
+                                                        // response from client will just be send to callback function.
     
     //Additional methods
     std::string getLastError();                 //Return last error if any
@@ -60,6 +63,9 @@ private:
     
     /// A variable to store lastError
     std::string lastError;
+    
+    /// Threads used to read incoming data from client(s)
+    std::thread readerThread;
     
     // Some internal methods
     void setLastError(std::string err); // Set error when occurred
