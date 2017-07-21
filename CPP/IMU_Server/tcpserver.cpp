@@ -51,6 +51,9 @@ TcpServer::~TcpServer()
     // Clean threads
     if(readerThread.joinable()) // any joinable thread will throw error is not called join() or detach()
         readerThread.join();    // the rest will be done by thread destructor
+    if(clientLinkThread.joinable())
+        clientLinkThread.join();
+    
 }
 
 /**
@@ -92,6 +95,14 @@ bool TcpServer::startServer()
     }
     
     this->serverListening = true;
+    
+    // Wait for first client then launch new threads
+    this->waitForClients();
+    
+    //Launch two new  threads
+    this->clientWaitForIncomingDataSeparateThread();    // Connection checker
+    this->keepLinkActiveSeparateThread();               // Listener for clients data
+    
     return true;
 }
 
@@ -109,6 +120,11 @@ bool TcpServer::stopServer()
     
     close(hClient); // Close connection with client if any
     close(hServer); // Shutdown server
+    
+    this->serverListening = false;
+    
+    this->readerThreadActive = false;
+    this->clientLinkThreadActive = false;
     
     return true;
 }
@@ -138,6 +154,7 @@ void TcpServer::waitForClients()
             // Extra check. If client is writable :)
             if (write(hClient, "Welcome  to IMU Server!\n", 24) >= 23)
             {
+                this->clientConnectedStatus = true; // set flag to indicate that a client is connected
                 return;
             }
         }
@@ -157,6 +174,10 @@ void TcpServer::clientWaitForIncomingData()
         return;
     }
     
+    // If no clients connected to socket also return - Later: Can't brake loop only because client is not connected
+    //if(this->getClientStatus() == false)
+        //return;
+    
     // We read message chunk by chunk so we need a buffer to store data
     char msgChunk[BUFFSIZE];
     
@@ -165,17 +186,25 @@ void TcpServer::clientWaitForIncomingData()
     
     while (true)   // Keep listening
     {
+        if(readerThreadActive == false)
+            break;
+        
         memset(&msgChunk, 0, sizeof(msgChunk));
         int readResult = (int) read(hClient, msgChunk, sizeof(msgChunk));
         
+        /**
+         * According to documentation, read(...) will return 0 in case of EOF
+         * and also in case of connection lost
+         */
         if( readResult == 0) //reached end of file (EOF)
         {
-            recvData += msgChunk;
-            recvData.erase( std::remove(recvData.begin(), recvData.end(), '\n'), recvData.end() );  //remove newlines first
-            recvData.push_back('\0');
-            
-            //clientIncomingDataCallback(recvData);   //send data to user to handle
-            recvData = "";  //We need to reset counter so we can read again
+//            recvData += msgChunk;
+//            recvData.erase( std::remove(recvData.begin(), recvData.end(), '\n'), recvData.end() );  //remove newlines first
+//            recvData.push_back('\0');
+//
+//            //clientIncomingDataCallback(recvData);   //send data to user to handle
+//            recvData = "";  //We need to reset counter so we can read again
+            this->clientConnectedStatus = false;
         }
         else if(readResult > 0)
         {
@@ -194,8 +223,37 @@ void TcpServer::clientWaitForIncomingData()
  */
 void TcpServer::clientWaitForIncomingDataSeparateThread()
 {
+    this->readerThreadActive = true;
+    
     readerThread = std::thread([this](){ clientWaitForIncomingData(); });   // Really, don't know how to explain this
     readerThread.detach();                                                  // monster lambada. But it works ^_^
+}
+
+/**
+ * Watch connection and attempt reconnect on case of lost conn
+ */
+void TcpServer::keepLinkActive()
+{
+    while(1)
+    {
+        if(this->clientLinkThreadActive == false)
+            break;
+        
+        if(this->getClientStatus() == false)   // if client was disconnected
+        {
+            std::cout << "Waiting for client..." << std::flush;
+            this->waitForClients();            // wait for reconnect or other clients
+            std::cout << "\x1b[1;32m" << "OK\n" << "\x1b[0m" << std::flush;
+        }
+        sleep(1);   // prevent high cpu
+    }
+}
+
+void TcpServer::keepLinkActiveSeparateThread()
+{
+    this->clientLinkThreadActive = true;
+    clientLinkThread = std::thread([this](){ keepLinkActive(); });
+    clientLinkThread.detach();
 }
 
 /**
@@ -216,6 +274,11 @@ int TcpServer::clientWrite(const char *data)
     }
     
     return (int)sendBytes;
+}
+
+bool TcpServer::getClientStatus()
+{
+    return clientConnectedStatus;
 }
 
 /*  ____   ____   ___ __     __ _   _____  _____  ____
@@ -254,4 +317,6 @@ std::string TcpServer::getLastError()
 {
     return this->lastError;
 }
+
+
 

@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include <chrono>
 
 /**
  * Simple sockets wrapper.
@@ -39,6 +40,7 @@ public:
     bool getServerStatus();     // Get status of server: started/stopped
     void waitForClients();      // Wait for incoming clients to connect to created server
     
+    // Attempt to get status of client using a combination of recv(...) and read(...)
     bool getClientStatus();     // Get status of client(s): connected/not connected
     
     int clientWrite(const char *);                // Write data to first connected client
@@ -48,6 +50,8 @@ public:
     void clientWaitForIncomingData();
     void clientWaitForIncomingDataSeparateThread();     // Run the same function on a separate thread. Now any
                                                         // response from client will just be send to callback function.
+    void keepLinkActive();
+    void keepLinkActiveSeparateThread();
     
     //Additional methods
     std::string getLastError();                 //Return last error if any
@@ -60,12 +64,14 @@ private:
     
     /// A variable to store the state of server.
     bool serverListening = false;       // This value became true on server is created and listen(...) was called
+    bool clientConnectedStatus = false;
     
     /// A variable to store lastError
     std::string lastError;
     
-    /// Threads used to read incoming data from client(s)
-    std::thread readerThread;
+    /// Threads used to read incoming data from client(s) and for connection watcher
+    std::thread readerThread;       bool readerThreadActive = true;
+    std::thread clientLinkThread;   bool clientLinkThreadActive = true;
     
     // Some internal methods
     void setLastError(std::string err); // Set error when occurred
