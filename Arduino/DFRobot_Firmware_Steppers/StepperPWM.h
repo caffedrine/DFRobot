@@ -5,14 +5,15 @@
 
 class StepperPWM
 {
+public:
 	enum DIRECTIONS
 	{
-		FORWARD,
-		BACKWARD
+		BACKWARD,
+		FORWARD
 	};
 
 public:
-	StepperPWM(int DIR, int STEP, int ENBL);
+	StepperPWM(int DIR, int STEP, int ENBL);	//AS PWM: only 9, 10 tested and works on NANO
 	StepperPWM(int DIR, int STEP, int ENBL, int MS1);
 	StepperPWM(int DIR, int STEP, int ENBL, int MS1, int MS2);
 	StepperPWM(int DIR, int STEP, int ENBL, int MS1, int MS2, int MS3);
