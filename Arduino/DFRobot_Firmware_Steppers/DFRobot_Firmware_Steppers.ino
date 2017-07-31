@@ -16,26 +16,26 @@ namespace utils
 ////////////////////////////////////////////////////////
 //Defining motors
 //        |<-------Arduino connector
-//  M1 O----O M2
+//  L1 O----O R1
 //     |    |
 //     |    |
-//  M4 O----O M3
+//  L2 O----O R2
 //
 //All motors are updated automatically using the following params:
 //Update these values via SDA/SCL;
 
 //Motor1
-int left_direction = StepperPWM::FORWARD;
+int left_direction1 =  StepperPWM::FORWARD, left_direction2 =  StepperPWM::FORWARD;
 int left_speed = 0;     // 0 - 255
 
 //Motor2
-int right_direction = StepperPWM::FORWARD;
+int right_direction1 = StepperPWM::FORWARD, right_direction2 = StepperPWM::FORWARD;
 int right_speed = 0;     // 0 - 255
 
 //////////////////////////////////////////////////////
 
-StepperPWM left(8, 9, 7);		//PINS: direction, step, enable
-StepperPWM right(11, 10, 12);
+StepperPWM left(12, 11, 9, 13);	//PINS: direction1, direction2, step, enable
+StepperPWM right(A5, 2, 10, A4);
 
 void setup()
 {
@@ -84,11 +84,13 @@ namespace utils
 	{
 		//Setting up direction of each side of car
 		right.setSpeed(right_speed);
-		right.setDirection(right_direction);
+		right.set1Direction(right_direction1);
+		right.set2Direction(right_direction2);
 		right.run();
 
 		left.setSpeed(left_speed);
-		left.setDirection(left_direction);
+		left.set1Direction(left_direction1);
+		left.set2Direction(left_direction2);
 		left.run();
 	}
 
@@ -107,9 +109,9 @@ namespace utils
 			previousMillis = millis();
 
 			String printStr = "";
-			printStr += "[L," + to_string(left_direction) + ","
+			printStr += "[L," + to_string(left_direction1) + "," + to_string(left_direction2) + ","
 			        + to_string(left_speed) + "] ";
-			printStr += "[R," + to_string(right_direction) + ","
+			printStr += "[R," + to_string(right_direction1) + "," + to_string(right_direction2) + ","
 			        + to_string(right_speed) + "] ";
 
 			Serial.println(printStr);
@@ -119,7 +121,7 @@ namespace utils
 	void parseMessage(String msg)
 	{
 		//Recv message format:
-		//[L,0,120]-[R,1,120]
+		//[L,0,0,120]-[R,1,1,120]
 		if (msg.length() <= 7)
 			return;
 
@@ -128,23 +130,26 @@ namespace utils
 		for (int i = 0; i <= packetsNr; i++)
 		{
 			String currPacket = getStringPartByNr(msg, '-', i);
-			String motor, dir, spd; //motor,direction,speed
+			String motor, dir1, dir2, spd; //motor,direction,speed
 
 			currPacket = currPacket.substring(1);     // Remove "["
 			currPacket = currPacket.substring(0, currPacket.length() - 1); // Remove "]"
 
 			motor = getStringPartByNr(currPacket, ',', 0);
-			dir = getStringPartByNr(currPacket, ',', 1);
-			spd = getStringPartByNr(currPacket, ',', 2);
+			dir1 = getStringPartByNr(currPacket, ',', 1);
+			dir2 = getStringPartByNr(currPacket, ',', 2);
+			spd = getStringPartByNr(currPacket, ',', 3);
 
 			if (motor == "L")
 			{
-				left_direction = to_int(dir);
+				left_direction1 = to_int(dir1);
+				left_direction2 = to_int(dir2);
 				left_speed = to_int(spd);
 			}
 			else if (motor == "R")
 			{
-				right_direction = to_int(dir);
+				right_direction1 = to_int(dir1);
+				right_direction2 = to_int(dir2);
 				right_speed = to_int(spd);
 			}
 

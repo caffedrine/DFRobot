@@ -1,45 +1,17 @@
 #include <Arduino.h>
 #include "StepperPWM.h"
 
-StepperPWM::StepperPWM(int DIR, int STEP, int ENBL):
-			dirPin(DIR), stepPin(STEP), enablePin(ENBL)
+StepperPWM::StepperPWM(int DIR1, int DIR2, int STEP, int ENBL):
+			dir1Pin(DIR1), dir2Pin(DIR2), stepPin(STEP), enablePin(ENBL)
 {
 	this->initPins();
 }
 
-StepperPWM::StepperPWM(int DIR, int STEP, int ENBL, int MS1):
-			dirPin(DIR), stepPin(STEP), enablePin(ENBL)
-{
-	this->initPins();
-	pinMode(MS1, OUTPUT);
-	digitalWrite(MS1, HIGH);
-}
-
-StepperPWM::StepperPWM(int DIR, int STEP, int ENBL, int MS1, int MS2):
-			dirPin(DIR), stepPin(STEP), enablePin(ENBL)
-{
-	this->initPins();
-	pinMode(MS1, OUTPUT);
-	pinMode(MS2, OUTPUT);
-	digitalWrite(MS1, HIGH);
-	digitalWrite(MS2, HIGH);
-}
-
-StepperPWM::StepperPWM(int DIR, int STEP, int ENBL, int MS1, int MS2, int MS3):
-			dirPin(DIR), stepPin(STEP), enablePin(ENBL)
-{
-	this->initPins();
-	pinMode(MS1, OUTPUT);
-	pinMode(MS2, OUTPUT);
-	pinMode(MS3, OUTPUT);
-	digitalWrite(MS1, HIGH);
-	digitalWrite(MS2, HIGH);
-	digitalWrite(MS3, HIGH);
-}
 
 void StepperPWM::initPins()
 {
-	pinMode(dirPin, OUTPUT);
+	pinMode(dir1Pin, OUTPUT);
+	pinMode(dir2Pin, OUTPUT);
 	pinMode(stepPin, OUTPUT);
 	pinMode(enablePin, OUTPUT);
 }
@@ -95,10 +67,18 @@ void StepperPWM::setSpeed(int speed)
 		this->enable();
 }
 
-void StepperPWM::setDirection(int direction)
+void StepperPWM::set1Direction(int direction)
 {
 	if(direction == this->DIRECTIONS::FORWARD)
-		digitalWrite(this->dirPin, HIGH);
+		digitalWrite(this->dir1Pin, HIGH);
 	else if (direction == this->DIRECTIONS::BACKWARD)
-		digitalWrite(this->dirPin, LOW);
+		digitalWrite(this->dir1Pin, LOW);
+}
+
+void StepperPWM::set2Direction(int direction)
+{
+	if(direction == this->DIRECTIONS::FORWARD)
+		digitalWrite(this->dir2Pin, HIGH);
+	else if (direction == this->DIRECTIONS::BACKWARD)
+		digitalWrite(this->dir2Pin, LOW);
 }

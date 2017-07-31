@@ -13,10 +13,7 @@ public:
 	};
 
 public:
-	StepperPWM(int DIR, int STEP, int ENBL);	//AS PWM: only 9, 10 tested and works on NANO
-	StepperPWM(int DIR, int STEP, int ENBL, int MS1);
-	StepperPWM(int DIR, int STEP, int ENBL, int MS1, int MS2);
-	StepperPWM(int DIR, int STEP, int ENBL, int MS1, int MS2, int MS3);
+	StepperPWM(int DIR1, int DIR2, int STEP, int ENBL);	//AS PWM: only 9, 10 tested and works on NANO
 	virtual ~StepperPWM(){}
 
 	bool init();
@@ -29,11 +26,11 @@ public:
 
 	//Custom classes
 	void setSpeed(int speed);
-	void setDirection(int DIR);
-
+	void set1Direction(int DIR);	//1 = front wheel
+	void set2Direction(int DIR);	//2 = back wheel
 private:
 	void initPins();
-	int dirPin, stepPin, enablePin;
+	int dir1Pin, dir2Pin, stepPin, enablePin;
 };
 
 #endif /* STEPPERPWM_H_ */
