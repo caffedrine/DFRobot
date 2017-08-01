@@ -82,6 +82,9 @@ private:
     //Gauge speedometter
     QQuickView *viewGauge;
     QWidget *containerGauge;
+
+    //Store command to be forwarded
+    QString forwardStr = "";
 };
 
 #endif // MAINWINDOW_H

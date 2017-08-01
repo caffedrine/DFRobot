@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     containerGauge->setMinimumSize(160, 160);
     containerGauge->setMaximumSize(160, 160);
     containerGauge->setFocusPolicy(Qt::TabFocus);
-    viewGauge->setSource(QUrl("../qml/CircularGauge.qml"));
+    viewGauge->setSource(QUrl("qml/CircularGauge.qml"));
     ui->verticalLayout->addWidget(containerGauge);
 
 	//Startup functions - Auto start TCP/IP server and connect au Arduino on startup
@@ -203,31 +203,17 @@ void MainWindow::serialSendDataToCar()
     if(ui->arduinoConnectionStatusLabel->text().contains("NOT"))
         this->serialAttemptReconnect();
 
+    //The format of message:
+   /*
+    *[L,1,1,255]-[R,1,1,255]
+    *
+    * [L, DIR1, DIR2, SPEED]-[R, DIR1, DIR2, SPEED]
+      L = left side, R = right side
+    */
+
 	if(ui->offsetCheckBox->isChecked() == false || ui->forwardModeCheckBox->isChecked() == true)
 	{
-		msg += "[M1,";
-		msg += ui->pushButton_reverse1->isChecked() ? "0" : "1";
-		msg += ",";
-		msg += QString::number(ui->motor1_slider->value());
-		msg += "]-";
-
-		msg += "[M2,";
-		msg += ui->pushButton_reverse2->isChecked() ? "0" : "1";
-		msg += ",";
-		msg += QString::number(ui->motor2_slider->value());
-		msg += "]-";
-
-		msg += "[M3,";
-		msg += ui->pushButton_reverse3->isChecked() ? "0" : "1";
-		msg += ",";
-		msg += QString::number(ui->motor3_slider->value());
-		msg += "]-";
-
-		msg += "[M4,";
-		msg += ui->pushButton_reverse4->isChecked() ? "0" : "1";
-		msg += ",";
-		msg += QString::number(ui->motor4_slider->value());
-		msg += "]";
+        msg = this->forwardStr;
 	}
 	else
 	{
@@ -236,238 +222,37 @@ void MainWindow::serialSendDataToCar()
 		int m1Dir,      m2Dir,      m3Dir,      m4Dir;
 
 		int direction;
-		int speed   = 0;
+        int lSpeed, rSpeed;
 
-		// Read offsets for motor calibration
-		m1Offset = ui->motor1_speedLabel->text().toInt();
-		m2Offset = ui->motor2_speedLabel->text().toInt();
-		m3Offset = ui->motor3_speedLabel->text().toInt();
-		m4Offset = ui->motor4_speedLabel->text().toInt();
+        //Filling initial speed
+        lSpeed = ui->speedSlider->value();
+        rSpeed = ui->speedSlider->value();
 
-		// Read direction of rotation and intensyty
-		direction = ui->directionLabel->text().toInt();
-		// Read speed and direction
-		speed = ui->speedLabel->text().toInt();
+        //Fill correct directions
+        m1Dir = ui->pushButton_reverse1->isChecked() ? 0 : 1;
+        m2Dir = ui->pushButton_reverse2->isChecked() ? 0 : 1;
+        m3Dir = ui->pushButton_reverse3->isChecked() ? 0 : 1;
+        m4Dir = ui->pushButton_reverse4->isChecked() ? 0 : 1;
 
-		//Processing speed and stuff
-		//Setting up direction. Negative value means backward
-		if(speed < 0)
-		{
-			m1Dir = m2Dir = m3Dir = m4Dir = 0;
-			speed *= -1;
-		}
-		else
-			m1Dir = m2Dir = m3Dir = m4Dir = 1;
+        /// TODO:
+        /// Process offsets and stuff
 
-		// Set all speed
-		m1Speed = m2Speed = m3Speed = m4Speed = speed;
+        //Build data structure
+        msg += "[L,";
+        msg += QString::number(m1Dir);
+        msg += ",";
+        msg += QString::number(m4Dir);
+        msg += ",";
+        msg += QString::number(lSpeed);
+        msg += "]-";
 
-		if( !direction )
-		{
-			/*
-				If make motor as array:
-				int motors[motorsNumber];
-				int offsets[motorsNumber];
-
-				for(int i = 0, i < motorsNumber, i++ )
-				{
-					motors[i] = speed;
-					if( speed )
-					{
-						motors[i] = m1Speed + offsets[0];
-						if( motors[i] > 255 )
-							motors[i] = 255;
-					}
-				}
-
-			*/
-
-			if(speed)
-			{
-				m1Speed = m1Offset + speed;
-				if( m1Speed > 255 )
-					m1Speed = 255;
-
-				m2Speed = m2Offset + speed;
-				if( m2Speed > 255 )
-					m2Speed = 255;
-
-				m3Speed = m3Offset + speed;
-				if( m3Speed > 255 )
-					m3Speed = 255;
-
-				m4Speed = m4Offset + speed;
-				if( m4Speed > 255 )
-					m4Speed = 255;
-			}
-
-//            //We may want to add offsets
-//            if(     m1Speed + m1Offset > 255 ||
-//                    m2Speed + m2Offset > 255 ||
-//                    m3Speed + m3Offset > 255 ||
-//                    m4Speed + m4Offset > 255    )
-//            {
-//                //How much more
-//                if( m1Speed + m1Offset > 255    )
-//                {
-//                    overVal = (m1Speed + m1Offset) - 255;
-//                    m1Speed = m1Offset + speed - overVal;
-//                    //Or you can simply m1Speed = 255 if yuou don't like math	.
-//                }
-//                else if(m2Speed + m2Offset > 255)
-//                {
-//                    overVal = (m2Speed + m2Offset) - 255;
-//                    m2Speed = m2Offset + speed - overVal;
-//                }
-//                else if(m3Speed + m3Offset > 255)
-//                {
-//                    overVal = (m3Speed + m3Offset) - 255;
-//                    m3Speed = m3Offset + speed - overVal;
-//                }
-//                else if(m4Speed + m4Offset > 255)
-//                {
-//                    overVal = (m4Speed + m4Offset) - 255;
-//                    m4Speed = m4Offset + speed - overVal;
-//                }
-//            }
-//            // ???????
-//            else
-//            {
-//                m1Speed = speed + m1Offset;
-//                m2Speed = speed + m2Offset;
-//                m3Speed = speed + m3Offset;
-//                m4Speed = speed + m4Offset;
-//            }
-
-			// ****************** ???????????????
-//            if( !(m1Speed + m1Offset > 255) )
-//                m1Speed -= overVal;
-
-//            if( !(m2Speed + m2Offset > 255) )
-//                m2Speed -= overVal;
-
-//            if( !(m3Speed + m3Offset > 255) )
-//                m3Speed -= overVal;
-
-//            if( !(m4Speed + m4Offset > 255) )
-//                m4Speed -= overVal;
-			// ****************** **************
-
-//            //hOWEVER, IF SPEED = 0, we want breake
-//            if(speed == 0)
-//                m1Speed = m2Speed = m3Speed = m4Speed = 0;
-
-			// *******************************
-		}
-		else
-		{
-		//Process direction
-		//Check if direction is changed and change motors values again
-//		direction = this->ui->leftRightSlider->value();
-
-//		if(direction != 0)
-//		{
-			//this mean that we have to change direction of pair motors
-			//M1 = M4
-			//M2 = M3
-
-			bool minus = false;
-
-			if(direction < 0)
-			{
-				//We need positive direction as it is easier to work with
-				direction *= -1;
-				minus = true;
-			}
-
-			int hSpeed = speed;
-			int lSpeed = ( speed * ( 100 - direction ) ) / 100;
-
-			if( minus )
-			{
-//				//We need positive direction as it is easier to work with
-//				direction *= -1;
-
-				m1Speed = m4Speed = lSpeed;
-				m2Speed = m3Speed = hSpeed;
-
-//				m1Speed -= (direction/2);
-//				if(m1Speed < 0)
-//				{
-//					m1Speed *=-1;
-//					m1Dir = (m1Dir == 0)?1:0;
-//				}
-
-//				m4Speed -= (direction/2);
-//				if(m4Speed < 0)
-//				{
-//					m4Speed *=-1;
-//					m4Dir = (m4Dir == 0)?1:0;
-//				}
-
-//				m2Speed += (direction/2);
-//				if(m2Speed > 255)
-//					m2Speed = 255;
-
-//				m3Speed += (direction/2);
-//				if(m3Speed > 255)
-//					m3Speed = 255;
-			}
-			else
-			{
-				m1Speed = m4Speed = hSpeed;
-				m2Speed = m3Speed = lSpeed;
-
-//				//we have to move right with k coeficient = direction
-//				m1Speed += (direction/2);
-//				if(m1Speed > 255)
-//					m1Speed = 255;
-
-//				m4Speed += (direction/2);
-//				if(m4Speed > 255)
-//					m4Speed = 255;
-
-//				m2Speed -= (direction/2);
-//				if(m2Speed < 0)
-//				{
-//					m2Speed *=-1;
-//					m2Dir = (m2Dir == 0)?1:0;
-//				}
-
-//				m3Speed -= (direction/2);
-//				if(m3Speed < 0)
-//				{
-//					m3Speed *=-1;
-//					m3Dir = (m3Dir == 0)?1:0;
-//				}
-			}
-		}
-		//******************************************
-
-		msg += "[M1,";
-		msg += QString::number(m1Dir);
-		msg += ",";
-		msg += QString::number(m1Speed);
-		msg += "]-";
-
-		msg += "[M2,";
-		msg += QString::number(m2Dir);
-		msg += ",";
-		msg += QString::number(m2Speed);
-		msg += "]-";
-
-		msg += "[M3,";
-		msg += QString::number(m3Dir);
-		msg += ",";
-		msg += QString::number(m3Speed);
-		msg += "]-";
-
-		msg += "[M4,";
-		msg += QString::number(m4Dir);
-		msg += ",";
-		msg += QString::number(m4Speed);
-		msg += "]";
-
+        msg += "[R,";
+        msg += QString::number(m2Dir);
+        msg += ",";
+        msg += QString::number(m3Dir);
+        msg += ",";
+        msg += QString::number(rSpeed);
+        msg += "]";
 	}
 
 	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
@@ -601,6 +386,9 @@ void MainWindow::tcpProcessRecvData(QString data)
 		qDebug() << "TCP RECV FAILED: Corrupted packet: " << data;
         return;
     }
+
+    //Set forward str to forward to wheels controller
+    this->forwardStr = data;
 
     //Update sliders
     ui->speedSlider->setValue( dataStructure->getSpeed().currentVal );

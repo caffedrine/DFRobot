@@ -1,7 +1,7 @@
 #ifndef STEPPERPWM_H_
 #define STEPPERPWM_H_
 
-#include "PWM.h"
+#include "libraries/PWM.h"
 
 class StepperPWM
 {
