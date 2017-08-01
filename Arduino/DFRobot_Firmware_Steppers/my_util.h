@@ -27,7 +27,7 @@ int getNumberOfChars(String str, char checkCharacter)
 {
 	int count = 0;
 
-	for (int i = 0; i < str.length(); i++)
+	for (unsigned int i = 0; i < str.length(); i++)
 	{
 		if (str[i] == checkCharacter)
 		{
@@ -45,7 +45,7 @@ String getStringPartByNr(String data, char separator, int index)
 	int stringData = 0;        //variable to count data part nr
 	String dataPart = "";      //variable to hole the return text
 
-	for (int i = 0; i <= data.length() - 1; i++)
+	for (unsigned int i = 0; i <= data.length() - 1; i++)
 	{
 		//Walk through the text one letter at a time
 		if (data[i] == separator)
@@ -71,7 +71,7 @@ String getStringPartByNr(String data, char separator, int index)
 	return dataPart;
 }
 
-void printPeriodicData(String data, int interval)
+void printPeriodicData(String data, unsigned int interval)
 {
 	static long previousMillis = 0;
 	if (millis() - previousMillis > interval)

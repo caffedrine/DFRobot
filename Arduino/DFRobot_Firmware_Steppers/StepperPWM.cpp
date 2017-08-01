@@ -1,12 +1,11 @@
 #include <Arduino.h>
 #include "StepperPWM.h"
 
-StepperPWM::StepperPWM(int DIR1, int DIR2, int STEP, int ENBL):
-			dir1Pin(DIR1), dir2Pin(DIR2), stepPin(STEP), enablePin(ENBL)
+StepperPWM::StepperPWM(int DIR1, int DIR2, int STEP, int ENBL) :
+		dir1Pin(DIR1), dir2Pin(DIR2), stepPin(STEP), enablePin(ENBL)
 {
 	this->initPins();
 }
-
 
 void StepperPWM::initPins()
 {
@@ -61,7 +60,7 @@ void StepperPWM::setSpeed(int speed)
 	int freq = map(speed, 0, 255, 0, 4096);
 	this->setFrequency(freq);
 
-	if(speed == 0)
+	if (speed == 0)
 		this->brake();
 	else
 		this->enable();
@@ -69,7 +68,7 @@ void StepperPWM::setSpeed(int speed)
 
 void StepperPWM::set1Direction(int direction)
 {
-	if(direction == this->DIRECTIONS::FORWARD)
+	if (direction == this->DIRECTIONS::FORWARD)
 		digitalWrite(this->dir1Pin, HIGH);
 	else if (direction == this->DIRECTIONS::BACKWARD)
 		digitalWrite(this->dir1Pin, LOW);
@@ -77,7 +76,7 @@ void StepperPWM::set1Direction(int direction)
 
 void StepperPWM::set2Direction(int direction)
 {
-	if(direction == this->DIRECTIONS::FORWARD)
+	if (direction == this->DIRECTIONS::FORWARD)
 		digitalWrite(this->dir2Pin, HIGH);
 	else if (direction == this->DIRECTIONS::BACKWARD)
 		digitalWrite(this->dir2Pin, LOW);

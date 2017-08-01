@@ -3,6 +3,7 @@
 #include "StepperPWM.h"
 #include "my_util.h"
 
+
 namespace utils
 {
 	void brake();
@@ -71,7 +72,7 @@ void loop()
 
 namespace utils
 {
-	void brakeIfNotHeardWithin(int interval)
+	void brakeIfNotHeardWithin(unsigned int interval)
 	{
 		if (millis() - lastTimeHeardFromHost > interval)
 		{
@@ -102,7 +103,7 @@ namespace utils
 
 	void displayData()
 	{
-		static int interval = 1000;
+		static unsigned int interval = 1000;
 		static long previousMillis = 0;
 		if (millis() - previousMillis > interval)
 		{
@@ -152,7 +153,6 @@ namespace utils
 				right_direction2 = to_int(dir2);
 				right_speed = to_int(spd);
 			}
-
 		}
 
 		lastTimeHeardFromHost = millis();
