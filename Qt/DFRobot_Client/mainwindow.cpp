@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
-	/*
+
 	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 
@@ -121,7 +121,7 @@ void MainWindow::joystick_moved(double x, double y)
     };
 
     //We don't want to get maximum speed. It's risky ;)
-	int speedMin = -150, speedMax = 150;
+    int speedMin = -255, speedMax = 255;
 	int steerMin = -90, steerMax = 90;
 
     //qDebug() << "Speed: " << map(x, -1.00000, +1.00000, -255, +255 ) << " " << "Direction: " << map(y, -1.00000, +1.00000, -255, +255 ) << "\n";
@@ -130,6 +130,10 @@ void MainWindow::joystick_moved(double x, double y)
     this->ui->speedSlider->setValue( map(y, -1.00000, 1.00000, speedMin, speedMax) );
     this->ui->directionSlider->setValue( map(x, -1.00000, 1.00000, steerMin, steerMax) );
     canUpdateServer = true;
+
+
+    if(this->ui->speedSlider->value() == 0 && this->ui->directionSlider == 0)   // set a sleep to make sure car is stopped
+        QThread::msleep(500);
 
     updateServer();
 }
@@ -221,10 +225,8 @@ void MainWindow::updateServer()
 	m3Offset = motors[3].speed;
 	m4Offset = motors[4].speed;
 
-	// Read direction of rotation and intensyty
-	direction = carSteering;
-	// Read speed and direction
-	speed = carSpeed;
+    direction = carSteering;    // Read direction of rotation and intensyty
+    speed = carSpeed;           // Read speed and direction
 
 	//Processing speed and stuff
 	//Setting up direction. Negative value means backward
@@ -239,186 +241,14 @@ void MainWindow::updateServer()
 	// Set all speed
 	m1Speed = m2Speed = m3Speed = m4Speed = speed;
 
-	if( !direction )
+    if( direction < 0 )
 	{
-		/*
-			If make motor as array:
-			int motors[motorsNumber];
-			int offsets[motorsNumber];
-
-			for(int i = 0, i < motorsNumber, i++ )
-			{
-				motors[i] = speed;
-				if( speed )
-				{
-					motors[i] = m1Speed + offsets[0];
-					if( motors[i] > 255 )
-						motors[i] = 255;
-				}
-			}
-
-		*/
-
-		if(speed)
-		{
-			m1Speed = m1Offset + speed;
-			if( m1Speed > 255 )
-				m1Speed = 255;
-
-			m2Speed = m2Offset + speed;
-			if( m2Speed > 255 )
-				m2Speed = 255;
-
-			m3Speed = m3Offset + speed;
-			if( m3Speed > 255 )
-				m3Speed = 255;
-
-			m4Speed = m4Offset + speed;
-			if( m4Speed > 255 )
-				m4Speed = 255;
-		}
-
-//            //We may want to add offsets
-//            if(     m1Speed + m1Offset > 255 ||
-//                    m2Speed + m2Offset > 255 ||
-//                    m3Speed + m3Offset > 255 ||
-//                    m4Speed + m4Offset > 255    )
-//            {
-//                //How much more
-//                if( m1Speed + m1Offset > 255    )
-//                {
-//                    overVal = (m1Speed + m1Offset) - 255;
-//                    m1Speed = m1Offset + speed - overVal;
-//                    //Or you can simply m1Speed = 255 if yuou don't like math	.
-//                }
-//                else if(m2Speed + m2Offset > 255)
-//                {
-//                    overVal = (m2Speed + m2Offset) - 255;
-//                    m2Speed = m2Offset + speed - overVal;
-//                }
-//                else if(m3Speed + m3Offset > 255)
-//                {
-//                    overVal = (m3Speed + m3Offset) - 255;
-//                    m3Speed = m3Offset + speed - overVal;
-//                }
-//                else if(m4Speed + m4Offset > 255)
-//                {
-//                    overVal = (m4Speed + m4Offset) - 255;
-//                    m4Speed = m4Offset + speed - overVal;
-//                }
-//            }
-//            // ???????
-//            else
-//            {
-//                m1Speed = speed + m1Offset;
-//                m2Speed = speed + m2Offset;
-//                m3Speed = speed + m3Offset;
-//                m4Speed = speed + m4Offset;
-//            }
-
-		// ****************** ???????????????
-//            if( !(m1Speed + m1Offset > 255) )
-//                m1Speed -= overVal;
-
-//            if( !(m2Speed + m2Offset > 255) )
-//                m2Speed -= overVal;
-
-//            if( !(m3Speed + m3Offset > 255) )
-//                m3Speed -= overVal;
-
-//            if( !(m4Speed + m4Offset > 255) )
-//                m4Speed -= overVal;
-		// ****************** **************
-
-//            //hOWEVER, IF SPEED = 0, we want breake
-//            if(speed == 0)
-//                m1Speed = m2Speed = m3Speed = m4Speed = 0;
-
-		// *******************************
+        m1Speed = m4Speed = speed + (direction*-1);
 	}
-	else
-	{
-	//Process direction
-	//Check if direction is changed and change motors values again
-//		direction = this->ui->leftRightSlider->value();
-
-//		if(direction != 0)
-//		{
-		//this mean that we have to change direction of pair motors
-		//M1 = M4
-		//M2 = M3
-
-		bool minus = false;
-
-		if(direction < 0)
-		{
-			//We need positive direction as it is easier to work with
-			direction *= -1;
-			minus = true;
-		}
-
-		int hSpeed = speed;
-		int lSpeed = ( speed * ( 100 - direction ) ) / 100;
-
-		if( minus )
-		{
-//				//We need positive direction as it is easier to work with
-//				direction *= -1;
-
-			m1Speed = m4Speed = lSpeed;
-			m2Speed = m3Speed = hSpeed;
-
-//				m1Speed -= (direction/2);
-//				if(m1Speed < 0)
-//				{
-//					m1Speed *=-1;
-//					m1Dir = (m1Dir == 0)?1:0;
-//				}
-
-//				m4Speed -= (direction/2);
-//				if(m4Speed < 0)
-//				{
-//					m4Speed *=-1;
-//					m4Dir = (m4Dir == 0)?1:0;
-//				}
-
-//				m2Speed += (direction/2);
-//				if(m2Speed > 255)
-//					m2Speed = 255;
-
-//				m3Speed += (direction/2);
-//				if(m3Speed > 255)
-//					m3Speed = 255;
-		}
-		else
-		{
-			m1Speed = m4Speed = hSpeed;
-			m2Speed = m3Speed = lSpeed;
-
-//				//we have to move right with k coeficient = direction
-//				m1Speed += (direction/2);
-//				if(m1Speed > 255)
-//					m1Speed = 255;
-
-//				m4Speed += (direction/2);
-//				if(m4Speed > 255)
-//					m4Speed = 255;
-
-//				m2Speed -= (direction/2);
-//				if(m2Speed < 0)
-//				{
-//					m2Speed *=-1;
-//					m2Dir = (m2Dir == 0)?1:0;
-//				}
-
-//				m3Speed -= (direction/2);
-//				if(m3Speed < 0)
-//				{
-//					m3Speed *=-1;
-//					m3Dir = (m3Dir == 0)?1:0;
-//				}
-		}
-	}
+    else if(direction > 0)
+    {
+        m2Speed = m3Speed = speed + direction;
+    }
 
 	motors[1].speed = m1Speed;
 	motors[1].direction = (DataStructure::DIRECTION)m1Dir;
@@ -669,14 +499,6 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 	DataStructure::Motor motors[5]; //Motor IDs should start from 1. This is why we have 5 elements;
 	int speed = value;
 
-	//custom offsets only for this function to go left and right.
-	//Initial offsets are also appended
-	int offset[] = {0, 0, 0, 0, 0};
-	offset[1] = 15;
-	offset[2] = 40;
-	offset[3] = 0;
-	offset[4] = 20;
-
 	//Setting up motors IDs
 	for(int i=1; i<=4; i++)
 		motors[i].id = i;
@@ -700,7 +522,7 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
-			motors[i].speed = speed + motors[i].speed + offset[i];	//because we already have offset stored here
+            motors[i].speed = speed + motors[i].speed;	//because we already have offset stored here
 	}
 	else if(speed > 0)
 	{
@@ -711,7 +533,7 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 
 		//Setting up motors speed + offset
 		for(int i=1; i<= 4; i++)
-			motors[i].speed = speed + motors[i].speed + offset[i]; 	//because we already have offset stored here
+            motors[i].speed = speed + motors[i].speed; 	//because we already have offset stored here
 
 	}
 	else

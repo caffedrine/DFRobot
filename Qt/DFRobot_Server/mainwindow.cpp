@@ -213,12 +213,25 @@ void MainWindow::serialSendDataToCar()
 
 	if(ui->offsetCheckBox->isChecked() == false || ui->forwardModeCheckBox->isChecked() == true)
 	{
-        msg = this->forwardStr;
+        //Build data structure from data received
+        msg += "[L,";
+        msg += QString::number(dataStructure->getMotorInfo(1).direction);
+        msg += ",";
+        msg += QString::number(dataStructure->getMotorInfo(4).direction);
+        msg += ",";
+        msg += QString::number(dataStructure->getMotorInfo(1).speed);
+        msg += "]-";
+
+        msg += "[R,";
+        msg += QString::number(dataStructure->getMotorInfo(2).direction);
+        msg += ",";
+        msg += QString::number(dataStructure->getMotorInfo(3).direction);
+        msg += ",";
+        msg += QString::number(dataStructure->getMotorInfo(2).speed);
+        msg += "]";
 	}
 	else
 	{
-		int m1Offset,   m2Offset,   m3Offset,   m4Offset;
-		int m1Speed,    m2Speed,    m3Speed,    m4Speed;
 		int m1Dir,      m2Dir,      m3Dir,      m4Dir;
 
 		int direction;
@@ -233,6 +246,14 @@ void MainWindow::serialSendDataToCar()
         m2Dir = ui->pushButton_reverse2->isChecked() ? 0 : 1;
         m3Dir = ui->pushButton_reverse3->isChecked() ? 0 : 1;
         m4Dir = ui->pushButton_reverse4->isChecked() ? 0 : 1;
+
+        if(lSpeed < 0 || rSpeed < 0)
+        {
+            lSpeed *= -1;
+            rSpeed *= -1;
+
+            m1Dir ^= 1; m2Dir ^= 1; m3Dir ^= 1; m4Dir ^= 1;
+        }
 
         /// TODO:
         /// Process offsets and stuff

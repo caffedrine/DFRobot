@@ -2,41 +2,36 @@
 
 #include "StepperPWM.h"
 #include "my_util.h"
-
+#include "DataStructure.h"
 
 namespace utils
 {
 	void brake();
-	void displayData();
-	void checkSerial();
 	void updateMotors();
-	void parseMessage(String msg);
 	void brakeIfNotHeardWithin(int interval);
+}
+
+namespace data
+{
+	void displayData();
+	void parseMessage();
+	void checkSerial();
 }
 
 ////////////////////////////////////////////////////////
 //Defining motors
-//        |<-------Arduino connector
 //  L1 O----O R1
 //     |    |
 //     |    |
 //  L2 O----O R2
-//
-//All motors are updated automatically using the following params:
-//Update these values via SDA/SCL;
 
-//Motor1
-int left_direction1 =  StepperPWM::FORWARD, left_direction2 =  StepperPWM::FORWARD;
-int left_speed = 0;     // 0 - 255
+// Structures to store data about motors
+DataStructure leftData;
+DataStructure rightData;
 
-//Motor2
-int right_direction1 = StepperPWM::FORWARD, right_direction2 = StepperPWM::FORWARD;
-int right_speed = 0;     // 0 - 255
-
-//////////////////////////////////////////////////////
-
-StepperPWM left(12, 11, 9, 13);	//PINS: direction1, direction2, step, enable
-StepperPWM right(A5, 2, 10, A4);
+// Motors controllers
+StepperPWM right(12, 11, 9, 13);	//PINS: direction1, direction2, step, enable
+StepperPWM left(A5, 2, 10, A4);
 
 void setup()
 {
@@ -54,13 +49,14 @@ void setup()
 }
 
 long lastTimeHeardFromHost = 0;
+
 void loop()
 {
 	//Read and parse serial message if available`
-	utils::checkSerial();
+	data::checkSerial();
 
 	//Display motors
-	utils::displayData();
+	data::displayData();
 
 	//Update motors speeds and the stuff
 	utils::updateMotors();
@@ -69,7 +65,6 @@ void loop()
 	//utils::brakeIfNotHeardWithin(10000);
 	//*/
 }
-
 namespace utils
 {
 	void brakeIfNotHeardWithin(unsigned int interval)
@@ -83,15 +78,36 @@ namespace utils
 
 	void updateMotors()
 	{
+		// Update motors this way to avoid current peaks
+//		static unsigned long prevMicros = 0;
+//		if(micros() - prevMicros > 200)	// increment speed until target every 200 microseconds
+//		{
+//			if(rightData.currSpeed != rightData.targetSpeed)	// if target data not reached
+//			{
+//				if(rightData.currSpeed < rightData.targetSpeed)	//we need to accelerate
+//				{
+//					rightData.currSpeed++;
+//				}
+//				else	// we need to slow down
+//				{
+//					rightData.currSpeed--;
+//				}
+//			}
+//		}
+
+		rightData.currSpeed = rightData.targetSpeed;
+		leftData.currSpeed = leftData.targetSpeed;
+
+
 		//Setting up direction of each side of car
-		right.setSpeed(right_speed);
-		right.set1Direction(right_direction1);
-		right.set2Direction(right_direction2);
+		right.setSpeed(rightData.currSpeed);
+		right.set1Direction(rightData.currM1Dir);
+		right.set2Direction(rightData.currM2Dir);
 		right.run();
 
-		left.setSpeed(left_speed);
-		left.set1Direction(left_direction1);
-		left.set2Direction(left_direction2);
+		left.setSpeed(leftData.currSpeed);
+		left.set1Direction(leftData.currM1Dir);
+		left.set2Direction(leftData.currM2Dir);
 		left.run();
 	}
 
@@ -100,7 +116,13 @@ namespace utils
 		left.brake();
 		right.brake();
 	}
+}
 
+/**
+ * Namespace used to get and parse data to serial
+ */
+namespace data
+{
 	void displayData()
 	{
 		static unsigned int interval = 1000;
@@ -110,10 +132,10 @@ namespace utils
 			previousMillis = millis();
 
 			String printStr = "";
-			printStr += "[L," + to_string(left_direction1) + "," + to_string(left_direction2) + ","
-			        + to_string(left_speed) + "] ";
-			printStr += "[R," + to_string(right_direction1) + "," + to_string(right_direction2) + ","
-			        + to_string(right_speed) + "] ";
+			printStr += "[L," + to_string(leftData.currM1Dir) + "," + to_string(leftData.currM2Dir) + ","
+			        + to_string(leftData.currSpeed) + "] ";
+			printStr += "[R," + to_string(rightData.currM1Dir) + "," + to_string(rightData.currM2Dir) + ","
+			        + to_string(rightData.currSpeed) + "] ";
 
 			Serial.println(printStr);
 		}
@@ -143,15 +165,15 @@ namespace utils
 
 			if (motor == "L")
 			{
-				left_direction1 = to_int(dir1);
-				left_direction2 = to_int(dir2);
-				left_speed = to_int(spd);
+				leftData.setCurrM1Dir(to_int(dir1));
+				leftData.setCurrM2Dir(to_int(dir2));
+				leftData.setTargetSpeed(to_int(spd));
 			}
 			else if (motor == "R")
 			{
-				right_direction1 = to_int(dir1);
-				right_direction2 = to_int(dir2);
-				right_speed = to_int(spd);
+				rightData.setCurrM1Dir(to_int(dir1));
+				rightData.setCurrM2Dir(to_int(dir2));
+				rightData.setTargetSpeed(to_int(spd));
 			}
 		}
 
@@ -172,8 +194,9 @@ namespace utils
 
 		if (serialString.length() > 0)
 		{
-			utils::parseMessage(serialString);
+			data::parseMessage(serialString);
 			serialString = "";
 		}
 	}
 }
+

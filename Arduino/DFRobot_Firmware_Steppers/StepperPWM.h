@@ -2,8 +2,9 @@
 #define STEPPERPWM_H_
 
 #include "libraries/PWM.h"
+#include "DataStructure.h"
 
-class StepperPWM
+class StepperPWM : public DataStructure
 {
 public:
 	enum DIRECTIONS
