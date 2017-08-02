@@ -208,6 +208,13 @@ void MainWindow::updateServer()
     carSteering = ui->directionLabel->text().toInt();
     carSpeed    = ui->speedLabel->text().toInt();
 
+    //Debugging: display PWM frequency:
+    auto map = [](double x, double in_min, double in_max, double out_min, double out_max)
+    {
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    };
+    ui->freqLabel->setText(QString::number ( (int)map(carSpeed, carSpeed<0?-255:0, carSpeed<0?0:255, carSpeed<0?4096:0, carSpeed<0?0:4096)  ) + "Hz" );
+
     //Process data here in order to get clean movement of car
     /////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////
@@ -508,8 +515,6 @@ void MainWindow::on_leftRightSlider_valueChanged(int value)
 	motors[2].speed = ui->m2speedLabel->text().toInt();
 	motors[3].speed = ui->m3speedLabel->text().toInt();
 	motors[4].speed = ui->m4speedLabel->text().toInt();
-
-//	int tempSpeed = 0;
 
 	if(speed < 0)
 	{
