@@ -13,22 +13,49 @@ Notes: If you define motors speed then you don't have to define speed and direct
 ### bUILDING EXAMPLE:
 ```
 
-//Defining 4 motors with it's speed and direction
+// Defining 4 motors with it's speed and direction
 
-DataStructure data(4);
+DataStructure data(4); 4 = number of motors
 data.setMotorInfo(1, 100, DataStructure::DIRECTION::FORWARD);
 data.setMotorInfo(2, 200, DataStructure::DIRECTION::FORWARD);
 data.setMotorInfo(3, 300, DataStructure::DIRECTION::BACKWARD);
 data.setMotorInfo(4, 400, DataStructure::DIRECTION::BACKWARD);
 
+// Setting up a variable called speed
+data.setSpeed(255);
+
+// Also setting a variable which mean steering
+data.setSteering(123);
+
 //Building string which will be send to the other side
-
+std::string finalStr = data.buildDataString();				// the string which can be parsed
 ```
 
-
-
+### Parsing example
 
 ```
+// Assuming that this string was received:
+std::string = yourFunctionToGetStr();
+
+DataStructure data(4);
+if(data.parseDataString( str ))
+	// We have a valid string parsed and stored inside *data*
+else
+	// Invalid data to be parsed
+
+//Now just get data out from structure
+
+//First motor
+data.getMotorInfo(1).id
+data.getMotorInfo(1).speed
+data.getMotorInfo(1).direction
+
+//Get speed variable
+data.getSpeed().currentVal;
+
+// Get steering
+data.getSteering().currentVal;
+
 ```
 
 
