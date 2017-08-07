@@ -111,11 +111,16 @@ void test()
 If you want to parse data received from another application, then make sure you send data in this format:
 
 Generic format:
-** >>[paramIdentifier,{value1-value2}]|[paraIdentifier2,{value1-value2...}<<**
+** >>[paramIdentifier,{value1-value2}]|[paraIdentifier2,{value1-value2...}<< **
 
 String to set two motors
 ```
 >>[m,{1-123-0}]|[m,{2-255,1}]<<
+```
+
+String to set speed and steering:
+```
+>>[s,{123}]|[d,{-123}]<<
 ```
 For motors, you set m (motor identifier), ther ID,Speed,Direction (in this order). 0 = backward, 1=forward
 
