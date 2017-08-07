@@ -2,7 +2,37 @@
 
 This class is used to encode/decode data which is send/received from/to car! Also all data is stored by this class!
 
-Example:
+Plain C++ written!
+
+This class can contain the following data:
+  1. 4 motors with ID, SPEED and DIRECTION;
+  2. Car speed (global speed)
+  3. Car direction
+Notes: If you define motors speed then you don't have to define speed and direction anymore as it is already given by motors speed.
+
+### bUILDING EXAMPLE:
+```
+
+//Defining 4 motors with it's speed and direction
+
+DataStructure data(4);
+data.setMotorInfo(1, 100, DataStructure::DIRECTION::FORWARD);
+data.setMotorInfo(2, 200, DataStructure::DIRECTION::FORWARD);
+data.setMotorInfo(3, 300, DataStructure::DIRECTION::BACKWARD);
+data.setMotorInfo(4, 400, DataStructure::DIRECTION::BACKWARD);
+
+//Building string which will be send to the other side
+
+```
+
+
+
+
+```
+```
+
+
+### Fullxample:
 
 ```
 void test()
