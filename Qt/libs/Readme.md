@@ -10,9 +10,8 @@ This class can contain the following data:
   3. Car direction
 Notes: If you define motors speed then you don't have to define speed and direction anymore as it is already given by motors speed.
 
-### bUILDING EXAMPLE:
-```
-
+### Building example:
+```cpp
 // Defining 4 motors with it's speed and direction
 
 DataStructure data(4); 4 = number of motors
@@ -33,7 +32,7 @@ std::string finalStr = data.buildDataString();				// the string which can be par
 
 ### Parsing example
 
-```
+```cpp
 // Assuming that this string was received:
 std::string = yourFunctionToGetStr();
 
@@ -61,7 +60,7 @@ data.getSteering().currentVal;
 
 ### Fullxample:
 
-```
+```cpp
 void test()
 {
     DataStructure data(4);
