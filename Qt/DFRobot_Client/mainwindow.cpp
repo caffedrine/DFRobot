@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	container->setFocusPolicy(Qt::TabFocus);
 	ui->joystickLayout->addWidget(container);
 
+
     //Init datastructure
     if(dataStructure != Q_NULLPTR)
     {
@@ -40,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dataStructure = new DataStructure(4);
 
     // Autofill ip address field when working on localhost
-
+    /*
 	QString ipAddress;
     QList<QHostAddress> ips = QNetworkInterface::allAddresses();
 
@@ -257,21 +258,21 @@ void MainWindow::updateServer()
         m2Speed = m3Speed = speed + direction;
     }
 
-	motors[1].speed = m1Speed;
-	motors[1].direction = (DataStructure::DIRECTION)m1Dir;
+    motors[1].speed = (m1Speed>255)?255:m1Speed;
+    motors[1].direction = (DataStructure::DIRECTION)m1Dir;
 
-	motors[2].speed = m2Speed;
-	motors[2].direction = (DataStructure::DIRECTION)m2Dir;
+    motors[2].speed = (m2Speed>255)?255:m2Speed;
+    motors[2].direction = (DataStructure::DIRECTION)m2Dir;
 
-	motors[3].speed = m3Speed;
-	motors[3].direction = (DataStructure::DIRECTION)m3Dir;
+    motors[3].speed = (m3Speed>255)?255:m3Speed;
+    motors[3].direction = (DataStructure::DIRECTION)m3Dir;
 
-	motors[4].speed = m4Speed;
-	motors[4].direction = (DataStructure::DIRECTION)m4Dir;
+    motors[4].speed = (m4Speed>255)?255:m4Speed;
+    motors[4].direction = (DataStructure::DIRECTION)m4Dir;
 
     /////////////////////////////////////////////////////////
     //Fill values into dataStructure
-	for(int i=1; i<=4; i++)
+    for(int i=1; i<=4; i++)
         dataStructure->setMotorInfo(i, motors[i].speed, motors[i].direction);
 
 	//Setting speed and steering
@@ -282,12 +283,13 @@ void MainWindow::updateServer()
     //Update speed gauge here so have as accurate info as possible
 	updateSpeedGauge(carSpeed);
 
-    const std::string str = dataStructure->buildDataString(true);
+    const std::string str = dataStructure->buildDataString(false);  //build unoptimized str
     QString buildedDataString = QString::fromStdString( str );
     if(buildedDataString.length() < 6 )
         return;
 
 	tcpWrite(buildedDataString);
+    //*/
 }
 
 qint64 MainWindow::tcpWrite(QString data)

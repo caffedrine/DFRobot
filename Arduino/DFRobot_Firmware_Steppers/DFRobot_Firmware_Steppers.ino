@@ -53,10 +53,11 @@ void setup()
 	pinMode(13, INPUT);
 
 	//Don't forget to init motors
-	if(!right.init() || !left.init())
+	if (!right.init() || !left.init())
 	{
 		Serial.println("Can't initialize motors frequency!");
-		while(1);
+		while (1)
+			;
 	}
 
 	//Stop all motors
@@ -117,17 +118,26 @@ namespace utils
 		rightData.currSpeed = rightData.targetSpeed;
 		leftData.currSpeed = leftData.targetSpeed;
 
+		if (rightData.currSpeed != rightData.lastSpeed)
+		{
+			//Setting up direction of each side of car
+			if (!right.setSpeed(rightData.currSpeed))
+				Serial.println("RIGHT SPEED CHANGE FAILED");
 
-		//Setting up direction of each side of car
-		right.setSpeed(rightData.currSpeed);
-		right.set1Direction(rightData.currM1Dir);
-		right.set2Direction(rightData.currM2Dir);
-		right.run();
+			right.set1Direction(rightData.currM1Dir);
+			right.set2Direction(rightData.currM2Dir);
+			right.run();
+		}
 
-		left.setSpeed(leftData.currSpeed);
-		left.set1Direction(leftData.currM1Dir);
-		left.set2Direction(leftData.currM2Dir);
-		left.run();
+		if (leftData.currSpeed != leftData.lastSpeed)
+		{
+			if (!left.setSpeed(leftData.currSpeed))
+				Serial.println("LEFT SPEED CHANGE FAILED");
+
+			left.set1Direction(leftData.currM1Dir);
+			left.set2Direction(leftData.currM2Dir);
+			left.run();
+		}
 	}
 
 	void brake()
@@ -151,9 +161,11 @@ namespace data
 			previousMillis = millis();
 
 			String printStr = "";
-			printStr += "[L," + to_string(leftData.currM1Dir) + "," + to_string(leftData.currM2Dir) + ","
+			printStr += "[L," + to_string(leftData.currM1Dir) + ","
+			        + to_string(leftData.currM2Dir) + ","
 			        + to_string(leftData.currSpeed) + "] ";
-			printStr += "[R," + to_string(rightData.currM1Dir) + "," + to_string(rightData.currM2Dir) + ","
+			printStr += "[R," + to_string(rightData.currM1Dir) + ","
+			        + to_string(rightData.currM2Dir) + ","
 			        + to_string(rightData.currSpeed) + "] ";
 
 			Serial.println(printStr);

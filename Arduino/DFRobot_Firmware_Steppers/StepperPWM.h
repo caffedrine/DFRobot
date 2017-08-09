@@ -26,7 +26,7 @@ public:
 	void disable();
 
 	//Custom classes
-	void setSpeed(int speed);
+	bool setSpeed(int speed);
 	void set1Direction(int DIR);	//1 = front wheel
 	void set2Direction(int DIR);	//2 = back wheel
 private:

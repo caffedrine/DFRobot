@@ -54,16 +54,18 @@ void StepperPWM::run()
 	pwmWrite(stepPin, 1);
 }
 
-void StepperPWM::setSpeed(int speed)
+bool StepperPWM::setSpeed(int speed)
 {
 	// Convert speed to freq or send direct - we receive from 0 to 255
 	int freq = map(speed, 0, 255, 0, 4096);
-	this->setFrequency(freq);
+	bool result = this->setFrequency(freq);
 
 	if (speed == 0)
 		this->brake();
 	else
 		this->enable();
+
+	return result;
 }
 
 void StepperPWM::set1Direction(int direction)
