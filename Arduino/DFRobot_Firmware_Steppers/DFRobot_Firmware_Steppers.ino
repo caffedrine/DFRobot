@@ -34,12 +34,22 @@ DataStructure rightData;
 //StepperPWM left(A5, 2, 10, A4);
 
 // Configured to be compatible with Arduino CNC Shield v3
-StepperPWM right(4, 5, 9, 13);	//PINS: direction1, direction2, step, enable
-StepperPWM left(6, 7, 10, A4);
+StepperPWM right(4, 5, 9, 8);	//PINS: direction1, direction2, step, enable
+StepperPWM left(6, 7, 10, 8);
 
 void setup()
 {
 	Serial.begin(115200);
+
+	/**
+	 * Because a modified version of Arduino UNO CNC Shield v3 customized, unused digital pins must be set as inputs!!!
+	 * Nod doing this may broke the board ^_^
+	 */
+	pinMode(2, INPUT);
+	pinMode(3, INPUT);
+	pinMode(11, INPUT);
+	pinMode(12, INPUT);
+	pinMode(13, INPUT);
 
 	//Don't forget to init motors
 	if(!right.init() || !left.init())
