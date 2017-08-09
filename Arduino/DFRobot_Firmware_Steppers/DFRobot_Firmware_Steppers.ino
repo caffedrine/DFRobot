@@ -34,6 +34,8 @@ DataStructure rightData;
 //StepperPWM left(A5, 2, 10, A4);
 
 // Configured to be compatible with Arduino CNC Shield v3
+StepperPWM right(4, 5, 9, 13);	//PINS: direction1, direction2, step, enable
+StepperPWM left(6, 7, 10, A4);
 
 void setup()
 {
@@ -67,6 +69,10 @@ void loop()
 	//utils::brakeIfNotHeardWithin(10000);
 	//*/
 }
+
+/**
+ * Namespace with util functions
+ */
 namespace utils
 {
 	void brakeIfNotHeardWithin(unsigned int interval)
