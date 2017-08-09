@@ -1,3 +1,3 @@
 # DFRobot
 
-Project firmwares organized by languages and categories.
+Project firmwares organized by programming languages and categories.
