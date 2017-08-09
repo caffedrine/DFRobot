@@ -30,8 +30,10 @@ DataStructure leftData;
 DataStructure rightData;
 
 // Motors controllers
-StepperPWM right(12, 11, 9, 13);	//PINS: direction1, direction2, step, enable
-StepperPWM left(A5, 2, 10, A4);
+//StepperPWM right(12, 11, 9, 13);	//PINS: direction1, direction2, step, enable
+//StepperPWM left(A5, 2, 10, A4);
+
+// Configured to be compatible with Arduino CNC Shield v3
 
 void setup()
 {
