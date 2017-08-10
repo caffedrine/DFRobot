@@ -34,8 +34,8 @@ DataStructure rightData;
 //StepperPWM left(A5, 2, 10, A4);
 
 // Configured to be compatible with Arduino CNC Shield v3
-StepperPWM right(2, 3, 9, 8);	//PINS: direction1, direction2, step, enable
-StepperPWM left(4, 12, 10, 8);
+//StepperPWM right(2, 3, 9, 8);	//PINS: direction1, direction2, step, enable
+//StepperPWM left(4, 12, 10, 8);
 
 void setup()
 {
@@ -52,16 +52,19 @@ void setup()
 	pinMode(11, INPUT);
 	pinMode(13, INPUT);
 
-	//Don't forget to init motors
-	if (!right.init() || !left.init())
-	{
-		Serial.println("Can't initialize motors frequency!");
-		while (1)
-			;
-	}
+	//Don't forget to initialize motors
+	pinMode(2, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(4, OUTPUT);
+	pinMode(12, OUTPUT);
+	pinMode(8, OUTPUT);
+	pinMode(9, OUTPUT);
+	pinMode(10, OUTPUT);
 
-	//Stop all motors
-	utils::brake();
+	leftData.setTargetSpeed(700);
+	rightData.setTargetSpeed(700);
+
+	digitalWrite(8, HIGH);
 }
 
 long lastTimeHeardFromHost = 0;
@@ -98,52 +101,53 @@ namespace utils
 
 	void updateMotors()
 	{
-		// Update motors this way to avoid current peaks
-//		static unsigned long prevMicros = 0;
-//		if(micros() - prevMicros > 200)	// increment speed until target every 200 microseconds
-//		{
-//			if(rightData.currSpeed != rightData.targetSpeed)	// if target data not reached
-//			{
-//				if(rightData.currSpeed < rightData.targetSpeed)	//we need to accelerate
-//				{
-//					rightData.currSpeed++;
-//				}
-//				else	// we need to slow down
-//				{
-//					rightData.currSpeed--;
-//				}
-//			}
-//		}
-
 		rightData.currSpeed = rightData.targetSpeed;
 		leftData.currSpeed = leftData.targetSpeed;
 
-		if (rightData.currSpeed != rightData.lastSpeed)
-		{
-			//Setting up direction of each side of car
-			if (!right.setSpeed(rightData.currSpeed))
-				Serial.println("RIGHT SPEED CHANGE FAILED");
+		// Update left side speed
+		static unsigned long lastMicros1 = micros();
+		static bool lastState1 = false;
 
-			right.set1Direction(rightData.currM1Dir);
-			right.set2Direction(rightData.currM2Dir);
-			right.run();
+		if(micros() - lastMicros1 > (unsigned long)rightData.currSpeed)
+		{
+			lastMicros1 = micros();
+			lastState1 = !lastState1;
+
+			// write digital signal
+			digitalWrite(9, lastState1);
+
+			//Also update directions from right side
+			digitalWrite(2, rightData.currM1Dir);
+			digitalWrite(3, rightData.currM2Dir);
 		}
 
-		if (leftData.currSpeed != leftData.lastSpeed)
+		// update right side speed
+		static unsigned long lastMicros2 = micros();
+		static bool lastState2 = false;
+		if(micros() - lastMicros2 > (unsigned long)leftData.currSpeed)
 		{
-			if (!left.setSpeed(leftData.currSpeed))
-				Serial.println("LEFT SPEED CHANGE FAILED");
+			lastMicros2 = micros();
+			lastState2 = !lastState2;
 
-			left.set1Direction(leftData.currM1Dir);
-			left.set2Direction(leftData.currM2Dir);
-			left.run();
+			// write digital signal
+			digitalWrite(10, lastState2);
+
+			//Also update directions from left side
+			digitalWrite(4, leftData.currM1Dir);
+			digitalWrite(12, leftData.currM2Dir);
 		}
+
+		// brake if necessary
+		if((leftData.targetSpeed == 700 && rightData.targetSpeed == 700) ||
+				(leftData.targetSpeed == 0 && rightData.targetSpeed == 0))
+			digitalWrite(8, HIGH);
+		else
+			digitalWrite(8, LOW);
 	}
 
 	void brake()
 	{
-		left.brake();
-		right.brake();
+		digitalWrite(8, HIGH);
 	}
 }
 
@@ -194,6 +198,9 @@ namespace data
 			dir2 = getStringPartByNr(currPacket, ',', 2);
 			spd = getStringPartByNr(currPacket, ',', 3);
 
+			spd = to_string(map(to_int(spd), 0, 255, 70, 700));
+			spd = to_string( map(to_int(spd), 70, 700, 700, 70) );
+
 			if (motor == "L")
 			{
 				leftData.setCurrM1Dir(to_int(dir1));
@@ -213,21 +220,28 @@ namespace data
 
 	void checkSerial()
 	{
-		static String serialString = "";
-
-		while (Serial.available())
+		/**
+		 * Attempting to read serial without any loop delay in order
+		 * to receive smooth speed changing.
+		 * So reading char by char is the best option in this case
+		 */
+		if (Serial.available())
 		{
-			char c = Serial.read();  //gets one byte from serial buffer
-			serialString += c; //makes the String readString
-			//for (int i = 0; i <= 100; i++);
-			delay(1); //slow looping to allow buffer to fill with next character
-		}
+			static String serialString;
+			char c = Serial.read();
 
-		if (serialString.length() > 0)
-		{
-			data::parseMessage(serialString);
-			serialString = "";
+			if(c == '>')
+			{
+				// parse received string
+				data::parseMessage(serialString);
+
+				// reset serial string
+				serialString = "";
+			}
+			else
+			{
+				serialString += c;
+			}
 		}
 	}
 }
-

@@ -228,7 +228,7 @@ void MainWindow::serialSendDataToCar()
         msg += QString::number(dataStructure->getMotorInfo(3).direction);
         msg += ",";
         msg += QString::number(dataStructure->getMotorInfo(2).speed);
-        msg += "]";
+        msg += "]>";        // Don't forget about ">"
 	}
 	else
 	{
@@ -273,7 +273,7 @@ void MainWindow::serialSendDataToCar()
         msg += QString::number(m3Dir);
         msg += ",";
         msg += QString::number(rSpeed);
-        msg += "]";
+        msg += "]>";        // Don't forget about ">"
 	}
 
 	if(serialPort == Q_NULLPTR || !serialPort->isOpen())
